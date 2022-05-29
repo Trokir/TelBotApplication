@@ -35,6 +35,7 @@ namespace TelBotApplication.Clients
         Random _rnd;
 
         private CancellationTokenSource cts;
+        private CancellationTokenSource _ctsHello;
 
         public BotClientService(IOptions<EnvironmentBotConfiguration> options, ILogger<BotClientService> logger, IMapper mapper, IBotCommandService commandService)
         {
@@ -98,6 +99,11 @@ namespace TelBotApplication.Clients
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+            if (_ctsHello == null)
+            {
+                _ctsHello = new CancellationTokenSource();
+            }
+            var token = _ctsHello.Token;
             var chat_message = new ChatMessage(update);
             var user = chat_message.GetCurrentUser();
             var message = chat_message.GetCurrentMessage();
@@ -158,7 +164,7 @@ namespace TelBotApplication.Clients
                     _fruit = _fruitsArr[index];
                     _callBackUser = new CallBackUser { UserId = user.GetUserId() };
                     var messageHello = await SendInAntiSpamline(botClient: botClient, message: message, user, _fruit, cancellationToken: cancellationToken);
-                    await RunTaskTimerAsync(botClient, messageHello.Chat.Id, messageHello.MessageId, messageHello.Chat.Username, new TimeSpan(0, 0, 15), user, cancellationToken);
+                    await RunTaskTimerAsync(botClient, messageHello.Chat.Id, messageHello.MessageId, messageHello.Chat.Username, new TimeSpan(0, 0, 40), user, token);
                     return;
                 }
             }
@@ -205,8 +211,8 @@ namespace TelBotApplication.Clients
                         }
 
                         _callBackUser = null;
-                    }, cancellationToken);
-                    cancellationToken.ThrowIfCancellationRequested();
+                    }, token);
+                    _ctsHello.Cancel();
 
 
                     return;
@@ -229,7 +235,7 @@ namespace TelBotApplication.Clients
                 {
                     await Task.Delay(interval, cancellationToken);
                     cancellationToken.ThrowIfCancellationRequested();
-                    var result1 = await botClient.SendTextMessageAsync(chatId: chatId, $"@{user.UserName}, пожалуйста выполни проверку на антиспам https://t.me/{userName ?? " "}/{messageId}", cancellationToken: cancellationToken);
+                    var result1 = await botClient.SendTextMessageAsync(chatId: chatId, $"@{user.UserName}, пожалуйста выполни проверку на антиспам https://t.me/{userName ?? " "}/{messageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
                     await Task.Delay(5000, cancellationToken);
                     await botClient.DeleteMessageAsync(result1.Chat.Id, result1.MessageId, cancellationToken);
                     await Task.Delay(interval, cancellationToken);

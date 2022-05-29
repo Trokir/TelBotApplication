@@ -75,7 +75,9 @@ namespace TelBotApplication.Clients
             {
                 User = await Client.LoginUserIfNeeded();
                 var chats = await Client.Messages_GetAllChats();
-                _chatBase = chats.chats[1238311479];
+                //_chatBase = chats.chats[1238311479];
+                _chatBase = chats.chats[1640302974];
+               
                 await ListenUpdate();
             }
             catch (Exception ex)

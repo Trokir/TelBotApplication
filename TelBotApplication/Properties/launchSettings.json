@@ -29,7 +29,8 @@
     },
     "Production": {
       "commandName": "Project",
-      "launchUrl": "swagger",
+      "launchBrowser": false,
+      "launchUrl": "starter/status",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production"
       },
