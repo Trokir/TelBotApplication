@@ -38,7 +38,7 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task DeleteCommandByIdAsync(int id)
         {
-            var entity = await _dbContext.BotCallers.SingleAsync(x => x.Id ==id);
+            var entity = await _dbContext.BotCallers.SingleAsync(x => x.Id == id);
             if (entity != null)
             {
                 _dbContext.BotCallers.Remove(entity);
@@ -50,8 +50,8 @@ namespace TelBotApplication.DAL.Services
         public async Task<BotCaller> UpdateEntityAsync(BotCaller entity)
         {
             _dbContext.BotCallers.Update(entity);
-                await _dbContext.SaveChangesAsync();
-                return entity;
+            await _dbContext.SaveChangesAsync();
+            return entity;
         }
 
         public async Task<IEnumerable<BotCaller>> UpdateEntitiesListAsync(IEnumerable<BotCaller> commandsList)

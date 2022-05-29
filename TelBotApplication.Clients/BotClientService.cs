@@ -36,12 +36,12 @@ namespace TelBotApplication.Clients
 
         private CancellationTokenSource cts;
 
-        public BotClientService(IOptions<EnvironmentBotConfiguration> options,  ILogger<BotClientService> logger,IMapper mapper, IBotCommandService commandService)
+        public BotClientService(IOptions<EnvironmentBotConfiguration> options, ILogger<BotClientService> logger, IMapper mapper, IBotCommandService commandService)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
             _logger = logger;
-           _mapper = mapper;
+            _mapper = mapper;
             _commandService = commandService;
             _rnd = new Random();
 
@@ -79,7 +79,7 @@ namespace TelBotApplication.Clients
                     await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
                 }
 
-               
+
                 await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
                 {
                     if (update is Update message)
@@ -188,7 +188,7 @@ namespace TelBotApplication.Clients
                                 $"Вы не прошли проверку на антиспам, вы будете лишены возможности комментировать в группе в течение одного часа." +
                                 $" У вас есть возможность за это время ознакомиться с правилами группы по этой ссылке \n https://t.me/winnersDV2022flood/3 ",
                                parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-                            await Task.Delay(10000,cancellationToken);
+                            await Task.Delay(10000, cancellationToken);
                             await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
                             try
                             {
@@ -229,16 +229,15 @@ namespace TelBotApplication.Clients
                 {
                     await Task.Delay(interval, cancellationToken);
                     cancellationToken.ThrowIfCancellationRequested();
-                    var result1 = await botClient.SendTextMessageAsync(chatId: chatId, $"@{user.UserName}, пожалуйста выполни проверку на антиспам https://t.me/{userName??" "}/{messageId}", cancellationToken: cancellationToken);
-                    await Task.Delay(5000,cancellationToken);
+                    var result1 = await botClient.SendTextMessageAsync(chatId: chatId, $"@{user.UserName}, пожалуйста выполни проверку на антиспам https://t.me/{userName ?? " "}/{messageId}", cancellationToken: cancellationToken);
+                    await Task.Delay(5000, cancellationToken);
                     await botClient.DeleteMessageAsync(result1.Chat.Id, result1.MessageId, cancellationToken);
-                    //_callBackUser = null
                     await Task.Delay(interval, cancellationToken);
                     cancellationToken.ThrowIfCancellationRequested();
                     await botClient.DeleteMessageAsync(chatId, messageId, cancellationToken);
                     await botClient.RestrictChatMemberAsync(chatId, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(1), cancellationToken);
                     var result = await botClient.SendTextMessageAsync(chatId: chatId, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, БАН на 100 лет", cancellationToken: cancellationToken);
-                    await Task.Delay(5000,cancellationToken);
+                    await Task.Delay(5000, cancellationToken);
                     await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
                 }
             }, cancellationToken);

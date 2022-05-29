@@ -50,19 +50,19 @@ namespace TelBotApplication.Controllers
         public async Task<ActionResult<BotCaller>> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
         {
             var command = _mapper.Map<BotCaller>(botCallerRequest);
-          var result=  await _botCommandService.UpdateEntityAsync(command);
+            var result = await _botCommandService.UpdateEntityAsync(command);
             return new OkObjectResult(result);
         }
 
         [HttpPut("updatelist")]
         public async Task<ActionResult<IEnumerable<BotCaller>>> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
         {
-            var commandsList = _mapper.Map< IEnumerable<BotCaller>>(botCallerRequestsList);
+            var commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
             var result = await _botCommandService.UpdateEntitiesListAsync(commandsList);
             return new OkObjectResult(result);
         }
         [HttpDelete("deletebycommand")]
-        public async  Task<ActionResult> DeleteCommandByCommandAsync(string command)
+        public async Task<ActionResult> DeleteCommandByCommandAsync(string command)
         {
             await _botCommandService.DeleteCommandByCommandAsync(command);
             return Ok();

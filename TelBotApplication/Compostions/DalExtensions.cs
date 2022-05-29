@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.DAL;
-using TelBotApplication.DAL.Services;
 
 namespace TelBotApplication.Compostions
 {

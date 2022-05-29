@@ -16,7 +16,7 @@ namespace TelBotApplication.Compostions
             services.AddScoped<IBotCommandService, BotCommandService>();
             services.AddTransient<BotClientService>();
             services.AddHostedService(provider => provider.GetService<BotClientService>());
-          
+
             return services;
         }
     }
