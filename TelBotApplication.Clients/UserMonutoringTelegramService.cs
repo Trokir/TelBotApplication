@@ -59,7 +59,7 @@ namespace TelBotApplication.Clients
                 case "last_name":
                     return _environmentConfiguration.last_name;
                 default:
-                    var res = _config[what];
+                    string res = _config[what];
                     return res; // use the ASP.NET configuration (see launchSettings.json)
             }
         }
@@ -74,10 +74,10 @@ namespace TelBotApplication.Clients
             try
             {
                 User = await Client.LoginUserIfNeeded();
-                var chats = await Client.Messages_GetAllChats();
+                Messages_Chats chats = await Client.Messages_GetAllChats();
                 _chatBase = chats.chats[1238311479];
-               // _chatBase = chats.chats[1640302974];
-               
+                // _chatBase = chats.chats[1640302974];
+
                 await ListenUpdate();
             }
             catch (Exception ex)
@@ -96,16 +96,16 @@ namespace TelBotApplication.Clients
 
         private void Client_Update(IObject arg)
         {
-            if (arg is not UpdatesBase notupdates) return;
+            if (arg is not UpdatesBase) return;
             if (arg is UpdatesBase updates)
             {
-                foreach (var update in updates.UpdateList)
+                foreach (Update update in updates.UpdateList)
                     switch (update)
                     {
                         case UpdateNewMessage unm: DisplayMessage(unm.message); break;
                         case UpdateEditMessage uem: DisplayMessage(uem.message, true); break;
                         // case UpdateDeleteChannelMessages udcm: Console.WriteLine($"{udcm.messages.Length} message(s) deleted in {Chat(udcm.channel_id)}"); break;
-                       // case UpdateDeleteMessages udm: Console.WriteLine($"{udm.messages.Length} message(s) deleted"); break;
+                        // case UpdateDeleteMessages udm: Console.WriteLine($"{udm.messages.Length} message(s) deleted"); break;
                         //case UpdateUserTyping uut: Console.WriteLine($"{CurrentUser(uut.user_id)} is {uut.action}"); break;
                         //case UpdateChatUserTyping ucut: Console.WriteLine($"{Peer(ucut.from_id)} is {ucut.action} in {Chat(ucut.chat_id)}"); break;
                         //case UpdateChannelUserTyping ucut2: Console.WriteLine($"{Peer(ucut2.from_id)} is {ucut2.action} in {Chat(ucut2.channel_id)}"); break;
@@ -127,13 +127,13 @@ namespace TelBotApplication.Clients
             switch (messageBase)
             {
                 case Message m:
-                    var vv = m.message.ToLower();
+                    string vv = m.message.ToLower();
                     bool total = false;
-                    var keywords = new string[] { "отчество", "выйграл" };
+                    string[] keywords = new string[] { "отчество", "выйграл" };
 
-                    if (long.TryParse(m.peer_id.ID.ToString(), out var chatIt))
+                    if (long.TryParse(m.peer_id.ID.ToString(), out long chatIt))
                     {
-                        Regex rules_name_nobadlang = new Regex(@"[б6b]+[\s\S]*[лl]+[\s\S]*[я(?:ya)(?:йа)]+
+                        _ = new Regex(@"[б6b]+[\s\S]*[лl]+[\s\S]*[я(?:ya)(?:йа)]+
                                        |[xхh]+[\s\S]*[уuy]+[\s\S]*[йиin1u]+|[пnpр]+[\s\S]*[eеэйиi1nu]+[\s\S]*[дd]+[\s\S]*
                                        [рpr]+|[xхh]+[\s\S]*[eэе]+[\s\S]*[рpr]+|[пnpр]+[\s\S]*[eэейиn1iu]
                                        +[\s\S]*[3зz]+[\s\S]*[дd]+|[ш(?:sh)щ]+[\s\S]*[лl]+[\s\S]*
@@ -147,22 +147,22 @@ namespace TelBotApplication.Clients
                             //    await Client.SendMessageAsync(_chatBase, $"мат");
                             //}
 
-                            var result1 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Strong);
-                            var result2 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Strong);
-                            var result3 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
+                            bool result1 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Strong);
+                            bool result2 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Strong);
+                            _ = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
 
                             if (total.TotalApproximatelyEquals(new bool[] { result1, result2/*, result3*/ }))
                             {
-                                await Client.SendMessageAsync(_chatBase, $"Запретное слово", reply_to_msg_id: m.id);
+                                _ = await Client.SendMessageAsync(_chatBase, $"Запретное слово", reply_to_msg_id: m.id);
                             }
                             result1 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Strong);
                             result2 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Strong);
-                             result3 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
+                            _ = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
 
                             if (total.TotalApproximatelyEquals(new bool[] { result1, result2/*, result3 */}))
                             {
 
-                                await Client.SendMessageAsync(_chatBase, $"/badword {m.id}");
+                                _ = await Client.SendMessageAsync(_chatBase, $"/badword {m.id}");
                             }
                         }
 

@@ -12,11 +12,11 @@ namespace TelBotApplication
     {
         public static void Main(string[] args)
         {
-            var host = CreateHostBuilder(args).UseDefaultServiceProvider(options =>
+            IHost host = CreateHostBuilder(args).UseDefaultServiceProvider(options =>
             options.ValidateScopes = false).Build();
-            using (var scope = host.Services.CreateScope())
+            using (IServiceScope scope = host.Services.CreateScope())
             {
-                var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
                 logger.LogWarning("Bot started");
             }
 
@@ -30,14 +30,14 @@ namespace TelBotApplication
 
             ConfigureAppConfiguration((context, config) =>
             {
-                config.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-                config.AddJsonFile("appsettings.json", optional: true, false);
-                config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true, false);
-                config.AddEnvironmentVariables();
+                _ = config.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                _ = config.AddJsonFile("appsettings.json", optional: true, false);
+                _ = config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true, false);
+                _ = config.AddEnvironmentVariables();
 
             }).ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    _ = webBuilder.UseStartup<Startup>();
                 })
 
             ;

@@ -15,9 +15,9 @@ namespace TelBotApplication.DAL
                 .SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))
                 .AddJsonFile("appsettings.Development.json")
                 .Build();
-            var optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
-            var connection = configuration.GetConnectionString("DefaualtConnection");
-            optionsBuilder.UseSqlite(connection);
+            DbContextOptionsBuilder<TelBotApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
+            string connection = configuration.GetConnectionString("DefaualtConnection");
+            _ = optionsBuilder.UseSqlite(connection);
             return new TelBotApplicationDbContext(optionsBuilder.Options);
         }
     }

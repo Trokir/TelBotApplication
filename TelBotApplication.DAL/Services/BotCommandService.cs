@@ -23,41 +23,41 @@ namespace TelBotApplication.DAL.Services
 
         public async Task AddNewCommandAsync(BotCaller caller)
         {
-            await _dbContext.BotCallers.AddAsync(caller);
-            await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.BotCallers.AddAsync(caller);
+            _ = await _dbContext.SaveChangesAsync();
         }
         public async Task DeleteCommandByCommandAsync(string command)
         {
-            var entity = await _dbContext.BotCallers.SingleAsync(x => x.Command.Equals(command));
+            BotCaller entity = await _dbContext.BotCallers.SingleAsync(x => x.Command.Equals(command));
             if (entity != null)
             {
-                _dbContext.BotCallers.Remove(entity);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.BotCallers.Remove(entity);
+                _ = await _dbContext.SaveChangesAsync();
             }
 
         }
         public async Task DeleteCommandByIdAsync(int id)
         {
-            var entity = await _dbContext.BotCallers.SingleAsync(x => x.Id == id);
+            BotCaller entity = await _dbContext.BotCallers.SingleAsync(x => x.Id == id);
             if (entity != null)
             {
-                _dbContext.BotCallers.Remove(entity);
-                await _dbContext.SaveChangesAsync();
+                _ = _dbContext.BotCallers.Remove(entity);
+                _ = await _dbContext.SaveChangesAsync();
             }
 
         }
 
         public async Task<BotCaller> UpdateEntityAsync(BotCaller entity)
         {
-            _dbContext.BotCallers.Update(entity);
-            await _dbContext.SaveChangesAsync();
+            _ = _dbContext.BotCallers.Update(entity);
+            _ = await _dbContext.SaveChangesAsync();
             return entity;
         }
 
         public async Task<IEnumerable<BotCaller>> UpdateEntitiesListAsync(IEnumerable<BotCaller> commandsList)
         {
             _dbContext.BotCallers.UpdateRange(commandsList);
-            await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync();
             return commandsList;
         }
     }

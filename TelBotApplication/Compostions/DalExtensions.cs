@@ -8,8 +8,8 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDalDependensies(this IServiceCollection services, string connectionString)
         {
-            services.AddScoped<TelBotApplicationDbContext>();
-            services.AddDbContext<TelBotApplicationDbContext>(opt => opt.UseSqlite(connectionString));
+            _ = services.AddScoped<TelBotApplicationDbContext>();
+            _ = services.AddDbContext<TelBotApplicationDbContext>(opt => opt.UseSqlite(connectionString));
             SQLitePCL.Batteries.Init();
             return services;
         }

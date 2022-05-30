@@ -6,7 +6,7 @@ namespace TelBotApplication.DAL.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
+            _ = migrationBuilder.CreateTable(
                 name: "UserListeners",
                 columns: table => new
                 {
@@ -20,13 +20,13 @@ namespace TelBotApplication.DAL.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserListeners", x => x.Id);
+                    _ = table.PrimaryKey("PK_UserListeners", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
+            _ = migrationBuilder.DropTable(
                 name: "UserListeners");
         }
     }

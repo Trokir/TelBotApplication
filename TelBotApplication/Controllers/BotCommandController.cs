@@ -26,7 +26,7 @@ namespace TelBotApplication.Controllers
         [HttpGet("getall")]
         public async Task<ActionResult<IEnumerable<BotCaller>>> GetAllCommandsAsync()
         {
-            var list = await _botCommandService.GetAllCommandsAsync();
+            IEnumerable<BotCaller> list = await _botCommandService.GetAllCommandsAsync();
             return Ok(list);
         }
         /// <summary>
@@ -37,7 +37,7 @@ namespace TelBotApplication.Controllers
         [HttpPost("add")]
         public async Task<ActionResult<BotCaller>> AddnewCommandAsync(BotCallerRequest botCallerRequest)
         {
-            var command = _mapper.Map<BotCaller>(botCallerRequest);
+            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
             await _botCommandService.AddNewCommandAsync(command);
             return Ok();
         }
@@ -49,16 +49,16 @@ namespace TelBotApplication.Controllers
         [HttpPut("update")]
         public async Task<ActionResult<BotCaller>> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
         {
-            var command = _mapper.Map<BotCaller>(botCallerRequest);
-            var result = await _botCommandService.UpdateEntityAsync(command);
+            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
+            BotCaller result = await _botCommandService.UpdateEntityAsync(command);
             return new OkObjectResult(result);
         }
 
         [HttpPut("updatelist")]
         public async Task<ActionResult<IEnumerable<BotCaller>>> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
         {
-            var commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
-            var result = await _botCommandService.UpdateEntitiesListAsync(commandsList);
+            IEnumerable<BotCaller> commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
+            IEnumerable<BotCaller> result = await _botCommandService.UpdateEntitiesListAsync(commandsList);
             return new OkObjectResult(result);
         }
         [HttpDelete("deletebycommand")]

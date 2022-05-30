@@ -16,7 +16,7 @@ namespace TelBotApplication.Domain.Chats
             {
                 throw new ArgumentNullException(nameof(update));
             }
-            var message = update.Message;
+            Message message = update.Message;
             _lastName = message?.From?.LastName ?? "no name";
             _firstName = message?.From?.FirstName ?? "";
             _userName = message?.From?.Username ?? string.Empty;

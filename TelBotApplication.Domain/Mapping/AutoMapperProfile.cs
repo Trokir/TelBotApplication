@@ -10,10 +10,10 @@ namespace TelBotApplication.Domain.Mapping
     {
         public AutoMapperProfile()
         {
-            CreateMap<BotCallerRequest, BotCaller>();
-            CreateMap<BotCallerRequestForUpdate, BotCaller>();
-            CreateMap<BotCommandDto, BotCaller>();
-            CreateMap<BotCaller, BotCommandDto>();
+            _ = CreateMap<BotCallerRequest, BotCaller>();
+            _ = CreateMap<BotCallerRequestForUpdate, BotCaller>();
+            _ = CreateMap<BotCommandDto, BotCaller>();
+            _ = CreateMap<BotCaller, BotCommandDto>();
 
         }
     }
