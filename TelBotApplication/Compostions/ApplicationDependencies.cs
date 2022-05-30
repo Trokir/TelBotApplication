@@ -13,8 +13,8 @@ namespace TelBotApplication.Compostions
         {
             services.AddSingleton<UserMonutoringTelegramService>();
             services.AddHostedService(provider => provider.GetService<UserMonutoringTelegramService>());
-            services.AddScoped<IBotCommandService, BotCommandService>();
-            services.AddTransient<BotClientService>();
+            services.AddTransient<IBotCommandService, BotCommandService>();
+            services.AddSingleton<BotClientService>();
             services.AddHostedService(provider => provider.GetService<BotClientService>());
 
             return services;

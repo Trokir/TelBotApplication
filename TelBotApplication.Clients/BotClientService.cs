@@ -12,6 +12,7 @@ using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Enums;
+using TelBotApplication.Domain.Models;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
@@ -45,13 +46,20 @@ namespace TelBotApplication.Clients
             _mapper = mapper;
             _commandService = commandService;
             _rnd = new Random();
-
+          
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             cts = new CancellationTokenSource();
             var cancellationToken = cts.Token;
+            var pollingTask = RunBotPolling(cancellationToken);
+            var dbUpdaterTask= AddCommandsListForBot(cancellationToken);
+            await Task.WhenAny(pollingTask, dbUpdaterTask);
+        }
+
+        private async Task RunBotPolling(CancellationToken cancellationToken)
+        {
             var receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = new Telegram.Bot.Types.Enums.UpdateType[]
@@ -62,43 +70,39 @@ namespace TelBotApplication.Clients
             };
             var updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
             await _bot.DeleteMyCommandsAsync(BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken: cancellationToken);
-            try
+
+            await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
             {
-                var list = await _commandService.GetAllCommandsAsync();
-                _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
-                if (_botCommands.Any())
+                if (update is Update message)
                 {
-                    var commandsList = new List<BotCommand>();
-                    foreach (var item in _botCommands)
-                    {
-                        commandsList.Add(new BotCommand
-                        {
-                            Command = item.Command,
-                            Description = item.Description
-                        });
-                    }
-                    await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
+                    await HandleUpdateAsync(_bot, message, cancellationToken);
                 }
-
-
-                await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
-                {
-                    if (update is Update message)
-                    {
-                        await HandleUpdateAsync(_bot, message, cancellationToken);
-
-                    }
-                }
-            }
-            catch (OperationCanceledException exception)
-            {
-                await HandleErrorAsync(_bot, exception, cancellationToken);
             }
         }
 
+        private async Task AddCommandsListForBot(CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                var list = await _commandService.GetAllCommandsAsync();
+                _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
+                var commandsList = new List<BotCommand>();
+                foreach (var item in _botCommands)
+                {
+                    commandsList.Add(new BotCommand
+                    {
+                        Command = item.Command,
+                        Description = item.Description
+                    });
+                }
+                await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
+                await Task.Delay(10000, cancellationToken);
+            }
+        }
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
+
             if (_ctsHello == null)
             {
                 _ctsHello = new CancellationTokenSource();
@@ -122,10 +126,10 @@ namespace TelBotApplication.Clients
                         switch (command.TypeOfreaction)
                         {
                             case TypeOfreactions.Text:
-                                await SendReactionByBotCommandWithTextAsync(botClient, message.Chat, message, user, "", command.Caption, cancellationToken).ConfigureAwait(false);
+                                await SendReactionByBotCommandWithTextAsync(botClient, message.Chat, message, user, "", command.Caption, cancellationToken);
                                 return;
                             case TypeOfreactions.Animation:
-                                await SendReactionByBotCommandWithAnimationAsync(botClient, message.Chat, message, command.Link, command.Caption, cancellationToken).ConfigureAwait(false);
+                                await SendReactionByBotCommandWithAnimationAsync(botClient, message.Chat, message, command.Link, command.Caption, cancellationToken);
                                 return;
                         }
                     }, cancellationToken);

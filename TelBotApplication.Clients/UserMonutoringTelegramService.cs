@@ -75,8 +75,8 @@ namespace TelBotApplication.Clients
             {
                 User = await Client.LoginUserIfNeeded();
                 var chats = await Client.Messages_GetAllChats();
-                //_chatBase = chats.chats[1238311479];
-                _chatBase = chats.chats[1640302974];
+                _chatBase = chats.chats[1238311479];
+               // _chatBase = chats.chats[1640302974];
                
                 await ListenUpdate();
             }
@@ -105,7 +105,7 @@ namespace TelBotApplication.Clients
                         case UpdateNewMessage unm: DisplayMessage(unm.message); break;
                         case UpdateEditMessage uem: DisplayMessage(uem.message, true); break;
                         // case UpdateDeleteChannelMessages udcm: Console.WriteLine($"{udcm.messages.Length} message(s) deleted in {Chat(udcm.channel_id)}"); break;
-                        case UpdateDeleteMessages udm: Console.WriteLine($"{udm.messages.Length} message(s) deleted"); break;
+                       // case UpdateDeleteMessages udm: Console.WriteLine($"{udm.messages.Length} message(s) deleted"); break;
                         //case UpdateUserTyping uut: Console.WriteLine($"{CurrentUser(uut.user_id)} is {uut.action}"); break;
                         //case UpdateChatUserTyping ucut: Console.WriteLine($"{Peer(ucut.from_id)} is {ucut.action} in {Chat(ucut.chat_id)}"); break;
                         //case UpdateChannelUserTyping ucut2: Console.WriteLine($"{Peer(ucut2.from_id)} is {ucut2.action} in {Chat(ucut2.channel_id)}"); break;
@@ -149,15 +149,15 @@ namespace TelBotApplication.Clients
 
                             var result1 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Strong);
                             var result2 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Strong);
-                            //var result3 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
+                            var result3 = vv.ApproximatelyEquals(keywords[0], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
 
                             if (total.TotalApproximatelyEquals(new bool[] { result1, result2/*, result3*/ }))
                             {
                                 await Client.SendMessageAsync(_chatBase, $"Запретное слово", reply_to_msg_id: m.id);
                             }
-                            result1 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Normal);
-                            result2 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Normal);
-                            // result3 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
+                            result1 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubstring, FuzzyStringComparisonTolerance.Strong);
+                            result2 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLongestCommonSubsequence, FuzzyStringComparisonTolerance.Strong);
+                             result3 = vv.ApproximatelyEquals(keywords[1], FuzzyStringComparisonOptions.UseLevenshteinDistance, FuzzyStringComparisonTolerance.Normal);
 
                             if (total.TotalApproximatelyEquals(new bool[] { result1, result2/*, result3 */}))
                             {
