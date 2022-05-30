@@ -11,8 +11,6 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration, EnvironmentConfiguration environment)
         {
-            _ = services.AddSingleton<UserMonutoringTelegramService>();
-            _ = services.AddHostedService(provider => provider.GetService<UserMonutoringTelegramService>());
             _ = services.AddTransient<IBotCommandService, BotCommandService>();
             _ = services.AddSingleton<BotClientService>();
             _ = services.AddHostedService(provider => provider.GetService<BotClientService>());

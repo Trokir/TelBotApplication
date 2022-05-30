@@ -71,7 +71,6 @@ namespace TelBotApplication.Clients
                 ThrowPendingUpdates = true
             };
             QueuedUpdateReceiver updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
-            await _bot.DeleteMyCommandsAsync(BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken: cancellationToken);
 
             await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
             {
@@ -97,7 +96,7 @@ namespace TelBotApplication.Clients
                     });
                 }
                 await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
-                await Task.Delay(10000, cancellationToken);
+                await Task.Delay(new TimeSpan(0, 15, 0), cancellationToken);
             }
         }
         #endregion
@@ -271,6 +270,87 @@ namespace TelBotApplication.Clients
                     await RunTaskTimerAsync(botClient, messageHello.Chat.Id, messageHello.MessageId, messageHello.Chat.Username, new TimeSpan(0, 0, 40), user, token);
                     return;
                 }
+            }
+            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
+                                                   $"Спасибо за сообщение, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
+                                                  parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Photo)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
+                                                     $"Спасибо за фото, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
+                                                    parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Video)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
+                                                    $"Спасибо за видео, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
+                                                   parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Document)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
+                                                    $"Спасибо за документ, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
+                                                   parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Sticker)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
+                                                    $"Спасибо за стикер, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
+                                                   parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)
+            {
+                await Task.Factory.StartNew(async () =>
+                {
+                    var result = await botClient.SendTextMessageAsync(chatId: update.EditedMessage.Chat.Id,
+                                                    $"Спасибо за исправление сообщения, дорогой(ая) {update.EditedMessage.From.FirstName} {update.EditedMessage.From.LastName} ",
+                                                   parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
+
+                    await Task.Delay(2000, cancellationToken);
+                    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+                }, cancellationToken).ConfigureAwait(false);
+                return;
             }
 
             if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
