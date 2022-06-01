@@ -1,9 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
@@ -12,12 +10,22 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
     <PackageReference Include="Telegram.Bot" Version="17.0.0" />
     <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
-    <PackageReference Include="WTelegramClient" Version="2.4.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\TelBotApplication.DAL\TelBotApplication.DAL.csproj" />
     <ProjectReference Include="..\TelBotApplication.Domain\TelBotApplication.Domain.csproj" />
+    <ProjectReference Include="..\TelBotApplication.Filters\TelBotApplication.Filters.csproj" />
   </ItemGroup>
-
+  <ItemGroup Label="spam">
+    <None Include="spam.consumption.cs">
+      <DependentUpon>spam.mbconfig</DependentUpon>
+    </None>
+    <None Include="spam.training.cs">
+      <DependentUpon>spam.mbconfig</DependentUpon>
+    </None>
+    <None Include="spam.zip">
+      <DependentUpon>spam.mbconfig</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

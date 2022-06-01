@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.Domain", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.Clients", "TelBotApplication.Clients\TelBotApplication.Clients.csproj", "{2A37369B-1C65-40E6-AED9-3709CECE1710}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TelBotApplication.DAL", "TelBotApplication.DAL\TelBotApplication.DAL.csproj", "{C502D8EB-2CBD-4FFD-938D-1D1B6C5CB8E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.DAL", "TelBotApplication.DAL\TelBotApplication.DAL.csproj", "{C502D8EB-2CBD-4FFD-938D-1D1B6C5CB8E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.Filters", "TelBotApplication.Filters\TelBotApplication.Filters.csproj", "{0C06523B-EA53-4524-A026-F6DAD86E6633}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{C502D8EB-2CBD-4FFD-938D-1D1B6C5CB8E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C502D8EB-2CBD-4FFD-938D-1D1B6C5CB8E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C502D8EB-2CBD-4FFD-938D-1D1B6C5CB8E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C06523B-EA53-4524-A026-F6DAD86E6633}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C06523B-EA53-4524-A026-F6DAD86E6633}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C06523B-EA53-4524-A026-F6DAD86E6633}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C06523B-EA53-4524-A026-F6DAD86E6633}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

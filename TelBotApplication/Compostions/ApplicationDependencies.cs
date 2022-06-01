@@ -3,17 +3,19 @@ using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.Clients;
 using TelBotApplication.DAL.Services;
 using TelBotApplication.Domain.Abstraction;
-
+using TelBotApplication.Filters;
 
 namespace TelBotApplication.Compostions
 {
     public static class ApplicationDependencies
     {
-        public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration, EnvironmentConfiguration environment)
+        public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            _ = services.AddTransient<IBotCommandService, BotCommandService>();
-            _ = services.AddSingleton<BotClientService>();
-            _ = services.AddHostedService(provider => provider.GetService<BotClientService>());
+            _ = services.AddTransient<IBotCommandService, BotCommandService>()
+                .AddSingleton<ISpamConfiguration, SpamConfiguration>()
+                .AddSingleton<BotClientService>()
+                .AddScoped< IFludFilter,FludFilter >()
+            .AddHostedService(provider => provider.GetService<BotClientService>());
 
             return services;
         }

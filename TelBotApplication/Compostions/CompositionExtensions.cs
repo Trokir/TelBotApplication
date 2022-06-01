@@ -9,16 +9,13 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            EnvironmentConfiguration environmentConfiguration = new EnvironmentConfiguration();
-            configuration.GetSection("Environment").Bind(environmentConfiguration);
+           
             EnvironmentBotConfiguration botConfig = new EnvironmentBotConfiguration();
             configuration.GetSection("BotConfig").Bind(botConfig);
-
-            _ = services.AddSingleton(Options.Create(environmentConfiguration));
             _ = services.AddSingleton(Options.Create(botConfig));
             string connection = configuration.GetConnectionString("DefaualtConnection");
 
-            return services.AddDalDependensies(connection).AddIntegrationDependencies(configuration, environmentConfiguration)
+            return services.AddDalDependensies(connection).AddIntegrationDependencies(configuration)
                 ;
         }
     }
