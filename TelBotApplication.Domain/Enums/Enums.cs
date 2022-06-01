@@ -5,4 +5,9 @@
         Text = 1,
         Animation = 2
     }
+    public enum TypeOfMessage
+    {
+        Spam = 1,
+        Ham = 2
+    }
 }

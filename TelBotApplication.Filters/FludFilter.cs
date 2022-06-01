@@ -17,7 +17,7 @@ namespace TelBotApplication.Filters
 
             //Load model and predict output
             var result = Spamers.Predict(sampleData).PredictedLabel;
-            return (result.Equals("ham")) ? true : false;
+            return (result.Equals("ham")) ? false : true;
         }
 
 
