@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Models;
 
 namespace TelBotApplication.DAL.Services

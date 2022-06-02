@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.DAL;
+using TelBotApplication.DAL.Interfaces;
+using TelBotApplication.DAL.Services;
 
 namespace TelBotApplication.Compostions
 {
@@ -8,8 +10,13 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDalDependensies(this IServiceCollection services, string connectionString)
         {
-            _ = services.AddScoped<TelBotApplicationDbContext>();
-            _ = services.AddDbContext<TelBotApplicationDbContext>(opt => opt.UseSqlite(connectionString));
+             services.AddScoped<TelBotApplicationDbContext>();
+             services.AddDbContext<TelBotApplicationDbContext>(opt => opt.UseSqlite(connectionString));
+            services.AddTransient<IVenueCommandServise, VenueCommandServise>()
+                .AddTransient<IAdminService, AdminService>()
+                .AddTransient<IGroupService, GroupService>()
+                 .AddTransient<IMessageLoggerService, MessageLoggerService>()
+                .AddTransient<IUnitOfWork, UnitOfWork>();
             SQLitePCL.Batteries.Init();
             return services;
         }

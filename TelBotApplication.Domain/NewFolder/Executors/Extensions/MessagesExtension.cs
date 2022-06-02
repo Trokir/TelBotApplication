@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using TelBotApplication.Domain.Dtos;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -10,6 +11,12 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
 {
+    // string texto = @"<b>bold</b>, <strong> bold </strong>" +
+    //@"<i> italic </i>, <em> italic </em>" +
+    //@"<a href = 'https://t.me/winnersDV2022flood/3'></a>"+
+    //@"<a href = 'tg://user?id=123456789'> inline mention of a user</a>" +
+    //@"<code> inline fixed-width code </code>" +
+    //@"<pre> pre - formatted fixed-width code block</pre>";
     public static class MessagesExtension
     {
 
@@ -30,14 +37,13 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return;
             }
-            _ = await Task.Factory.StartNew(async () =>
-            {
-                var result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
+            Telegram.Bot.Types.Chat c = message.Chat;
+            Message result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
                disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
-
+                await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            }, cancellationToken).ConfigureAwait(false);
+        
         }
         public static async Task SendAnimationWhithDelayAsync(
             this ITelegramBotClient botClient,bool isEnabled, Message message,
@@ -61,20 +67,78 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return;
             }
-            _ = await Task.Factory.StartNew(async () =>
-            {
-                var result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
+            Message result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
                     animation: animation, duration: duration, width: width, height: height,
                     thumb: thumb, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
                     replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
-
+                await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            }, cancellationToken).ConfigureAwait(false);
         }
 
-        public static async Task SendPhotoWhithDelayAsync(
+        //public static async Task SendLocationWithDelayAsync(
+        //     this ITelegramBotClient botClient,
+        //     VenueRequest location,
+        //     ChatId chatId,
+        //     bool isEnabled,
+        //      Message message,
+        //     double latitude,
+        //     double longitude,
+        //     int? livePeriod = default,
+        //     int? heading = default,
+        //     int? proximityAlertRadius = default,
+        //     bool? disableNotification = default,
+        //     int? replyToMessageId = default,
+        //     bool? allowSendingWithoutReply = default,
+        //     IReplyMarkup? replyMarkup = default,
+        //     CancellationToken cancellationToken = default
+        // )
+        //{
+        //    if (!isEnabled)
+        //    {
+        //        return;
+        //    }
+
+        //    Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude, title: location.Title, address: location.Address, foursquareId: fo cancellationToken: cancellationToken);
+        //    await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
+        //    await Task.Delay(30000);
+        //    await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
+        //}
+        public static async Task SendVenueWithDelayAsync(
+             this ITelegramBotClient botClient,
+             bool isEnabled,
+             TimeSpan delay,
+             Message message,
+             VenueRequest location,
+             ChatId chatId,
+             string? foursquareId = default,
+             string? foursquareType = default,
+             string? googlePlaceId = default,
+             string? googlePlaceType = default,
+             bool? disableNotification = default,
+             int? replyToMessageId = default,
+             bool? allowSendingWithoutReply = default,
+             IReplyMarkup? replyMarkup = default,
+             CancellationToken cancellationToken = default
+         )
+        {
+            if (!isEnabled)
+            {
+                return;
+            }
+
+            Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude,
+                title: location.Title, address: location.Address, 
+                foursquareId: foursquareId,foursquareType:foursquareType, googlePlaceId: googlePlaceId, googlePlaceType: googlePlaceType,
+                disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+            await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
+            await Task.Delay(delay,cancellationToken);
+            await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
+        }
+
+        public static async Task SendPhotoWithDelayAsync(
             this ITelegramBotClient botClient,
+            Message message,
              TimeSpan delay,
             ChatId chatId,
             InputOnlineFile photo,
@@ -92,15 +156,12 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return ;
             }
-            _ = await Task.Factory.StartNew(async () =>
-            {
-                var result = await botClient.SendPhotoAsync(chatId: chatId,
+            Message result = await botClient.SendPhotoAsync(chatId: chatId,
                    photo:photo, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
                     replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
-
+                await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            }, cancellationToken).ConfigureAwait(false);
         }
     }
 

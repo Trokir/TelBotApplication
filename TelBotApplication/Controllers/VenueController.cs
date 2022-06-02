@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TelBotApplication.DAL;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models;
 

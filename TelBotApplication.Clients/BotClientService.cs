@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using TelBotApplication.DAL;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
 using TelBotApplication.Domain.Dtos;
@@ -20,6 +20,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelBotApplication.Clients
@@ -35,6 +36,7 @@ namespace TelBotApplication.Clients
         private readonly IFludFilter _fludFilter;
         private readonly IMemberExecutor _newmembersService;
         private ChatMember[] _admins;
+        private readonly ITextFilter _textFilter;
         private ITelegramBotClient _bot { get; set; }
         private readonly string[] _fruitsArr;
         private CallBackUser _callBackUser;
@@ -49,13 +51,15 @@ namespace TelBotApplication.Clients
             IMapper mapper,
             IUnitOfWork commandService,
             IFludFilter fludFilter,
-            IMemberExecutor newmembersService
+            IMemberExecutor newmembersService,
+            ITextFilter textFilter
             )
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
             _logger = logger;
             _mapper = mapper;
+            _textFilter = textFilter;
             _newmembersService = newmembersService;
             _commandService = commandService;
             _rnd = new Random();
@@ -78,162 +82,6 @@ namespace TelBotApplication.Clients
             _ = await Task.WhenAny(pollingTask, dbUpdaterTask);
 
         }
-        private async Task _newmembersService_RestrictEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId, cancellationToken);
-            await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5), cancellationToken);
-            var result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
-                $@" < a href = 'https://t.me/winnersDV2022flood/3' >< /a > ", cancellationToken: cancellationToken);
-            await Task.Delay(5000, cancellationToken);
-            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-        }
-
-        private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            var result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{message.From.Username}," +
-                        $" пожалуйста выполни проверку на антиспам https://t.me/{message.From.Username ?? " "}/{message.MessageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
-            await Task.Delay(10000, cancellationToken);
-            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-        }
-
-
-        #region Start
-        private async Task RunBotPolling(CancellationToken cancellationToken)
-        {
-            ReceiverOptions receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = new Telegram.Bot.Types.Enums.UpdateType[]
-                {
-
-                },
-                ThrowPendingUpdates = true
-            };
-            QueuedUpdateReceiver updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
-
-            try
-            {
-                await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
-                {
-                    if (update is Update message)
-                    {
-
-                        await HandleUpdateAsync(_bot, message, cancellationToken);
-                    }
-
-                }
-
-            }
-            catch { }
-        }
-        private async Task AddCommandsListForBot(CancellationToken cancellationToken)
-        {
-            while (true)
-            {
-                IEnumerable<VenueCommand> locations = await _commandService.VenueCommandServise.GetAllAsync();
-                IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
-                _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
-                _venueRequests = _mapper.Map<IEnumerable<VenueRequest>>(locations);
-                List<BotCommand> commandsList = new List<BotCommand>();
-                foreach (BotCommandDto item in _botCommands)
-                {
-                    commandsList.Add(new BotCommand
-                    {
-                        Command = item.Command,
-                        Description = item.Description
-                    });
-                }
-                foreach (VenueRequest item in _venueRequests)
-                {
-                    commandsList.Add(new BotCommand
-                    {
-                        Command = item.Command,
-                        Description = item.Title
-                    });
-                }
-                await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
-                await Task.Delay(new TimeSpan(0, 5, 0), cancellationToken);
-            }
-        }
-        #endregion
-
-        #region Reactions
-      
-      
-        private async Task SendReactionByBotCommandWithLocationAsync(ITelegramBotClient botClient, Message message, string text, CancellationToken cancellationToken)
-        {
-           
-            _ = await Task.Factory.StartNew(async () =>
-            {
-                VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
-                Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude, title: location.Title, address: location.Address, cancellationToken: cancellationToken);
-                await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
-                await Task.Delay(30000);
-                await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-            }, cancellationToken);
-        }
-        #endregion
-
-        #region Inline buttons
-        private async void SendInlineAdmins(ITelegramBotClient botClient, ChatMember[] members, Telegram.Bot.Types.Chat chat, Message message, long chatId, CancellationToken cancellationToken)
-        {
-            IEnumerable<IEnumerable<InlineKeyboardButton>> btnArr = GetButtons(members);
-            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(btnArr);
-            // keyboard
-            await botClient.DeleteMessageAsync(chatId: chat, message.MessageId, cancellationToken);
-            _ = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "Вызов администратора",
-                replyMarkup: inlineKeyboard,
-                cancellationToken: cancellationToken);
-
-
-        }
-        private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtons(ChatMember[] members)
-        {
-            foreach (ChatMember member in members)
-            {
-                yield return new InlineKeyboardButton[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: $"{member.User.FirstName} {member.User.LastName}", callbackData: $"@{member.User.Username}")
-                };
-            }
-        }
-        private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtonsForHello()
-        {
-            foreach (string fruit in _fruitsArr)
-            {
-                yield return new InlineKeyboardButton[]
-                {
-                    InlineKeyboardButton.WithCallbackData(text: fruit, callbackData: fruit)
-                };
-            }
-        }
-        private async Task<Message> SendInAntiSpamline(ITelegramBotClient botClient, Message message, ChatUser user, string fruit, CancellationToken cancellationToken)
-        {
-
-            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
-               new[]
-               {
-                    new[]
-                    {
-                        InlineKeyboardButton.WithCallbackData(text: "🍎", callbackData: "🍎"),
-                        InlineKeyboardButton.WithCallbackData(text: "🍌", callbackData: "🍌"),
-                        InlineKeyboardButton.WithCallbackData(text: "🍒", callbackData: "🍒"),
-                        InlineKeyboardButton.WithCallbackData(text: "🍍", callbackData: "🍍"),
-                        InlineKeyboardButton.WithCallbackData(text: "🍋", callbackData: "🍋"),
-                        InlineKeyboardButton.WithCallbackData(text: "🍉", callbackData: "🍉")
-                    }
-               });
-
-            Message messag = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: {user.GetFullName()}  @{user.UserName}, если ты " +
-                $"не БОТ и не СПАМЕР, пройди проверку, нажав на кнопку, где есть {fruit}", parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, replyMarkup: keyboard,
-               cancellationToken: cancellationToken);
-
-            return messag;
-        }
-        #endregion
-
-
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
 
@@ -250,30 +98,32 @@ namespace TelBotApplication.Clients
             // Некоторые действия
             _logger.LogDebug(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.Message)
+            if (update.Type == UpdateType.Message)
             {
                 if (text != null && _botCommands.Any(x => text.Contains(x.Command.ToLower().Trim())))
                 {
-                    
-                        var command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
-                        switch (command.TypeOfreaction)
-                        {
-                            case TypeOfreactions.Text:
-                                await botClient.SendTextMessageWhithDelayAsync(isEnabled:true, message, message.Chat, $" {command.Caption} {user.GetFullName()} !", new TimeSpan(0, 0, 30), cancellationToken: cancellationToken);
-                                return;
-                            case TypeOfreactions.Animation:
-                                await botClient.SendAnimationWhithDelayAsync(isEnabled: true, message, message.Chat, animation: command.Link, new TimeSpan(0, 0, 30), caption: command.Caption, cancellationToken: cancellationToken);
-                                return;
+
+                    BotCommandDto command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
+                    switch (command.TypeOfreaction)
+                    {
+                        case TypeOfreactions.Text:
+                            await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $" {command.Caption} {user.GetFullName()} !", new TimeSpan(0, 0, 30), cancellationToken: cancellationToken);
+                            return;
+                        case TypeOfreactions.Animation:
+                            await botClient.SendAnimationWhithDelayAsync(isEnabled: true, message, message.Chat, animation: command.Link, new TimeSpan(0, 0, 30), caption: command.Caption, cancellationToken: cancellationToken);
+                            return;
                         case TypeOfreactions.Photo:
-                            await botClient.SendPhotoWhithDelayAsync(delay: new TimeSpan(0, 0, 30), message.Chat, photo: command.Link, isEnabled: true, caption: command.Caption, cancellationToken: cancellationToken);
+                            await botClient.SendPhotoWithDelayAsync(message: message, delay: new TimeSpan(0, 0, 30), message.Chat, photo: command.Link, isEnabled: true, caption: command.Caption, cancellationToken: cancellationToken);
                             return;
                     }
-                   
+
                 }
 
                 if (text != null && _venueRequests.Any(x => text.Contains(x.Command.ToLower().Trim())))
                 {
-                    await SendReactionByBotCommandWithLocationAsync(botClient, message, text, cancellationToken);
+                    VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
+                    await botClient.SendVenueWithDelayAsync(true, new TimeSpan(0, 0, 30), message, location, message.Chat, cancellationToken: cancellationToken);
+
                     return;
                 }
 
@@ -282,7 +132,8 @@ namespace TelBotApplication.Clients
                 {
                     int count = await botClient.GetChatMemberCountAsync(message.Chat, cancellationToken);
                     ChatMember[] countAdmins = await botClient.GetChatAdministratorsAsync(message.Chat, cancellationToken);
-                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"В чате юзеров {count} ; администраторов {countAdmins.Length}  от {user.GetFullName()}",new TimeSpan(0,0,30), cancellationToken: cancellationToken);
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"В чате юзеров {count} ; администраторов {countAdmins.Length} " +
+                        $" от {user.GetFullName()}", new TimeSpan(0, 0, 30), cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -297,7 +148,7 @@ namespace TelBotApplication.Clients
                     SendInlineAdmins(botClient: botClient, selectedAdmins, message.Chat, message, chatId: message.Chat.Id, cancellationToken: cancellationToken);
                     return;
                 }
-                if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMembersAdded)
+                if (message?.Type != null && message.Type == MessageType.ChatMembersAdded)
                 {
                     int index = _rnd.Next(_fruitsArr.Length);
                     _fruit = _fruitsArr[index];
@@ -306,7 +157,7 @@ namespace TelBotApplication.Clients
                     _newmembersService.AddNewMember(messageHello, DateTime.Now);
                     return;
                 }
-                if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft)
+                if (message?.Type != null && message.Type == MessageType.ChatMemberLeft)
                 {
                     await botClient.SendAnimationWhithDelayAsync(isEnabled: true, message, message.Chat, animation: "https://i.gifer.com/ABMO.gif",
                         new TimeSpan(0, 0, 30), caption: $"Прощай дорогой {user.GetFullName()}.\n Нам будет тебя не хватать (((((", cancellationToken: cancellationToken);
@@ -314,51 +165,20 @@ namespace TelBotApplication.Clients
                 }
             }
 
-            if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
+            if (message?.Type != null && message.Type == MessageType.Text)
             {
-                //if (text.Trim() == "poll")
-                //{
-                //    Message pollMessage = await botClient.SendPollAsync(
-                //     chatId: message.Chat,
-                //     question: "Что выбрать : Рио или Сантьяго ?",
-                //     options: new[]
-                //     {
-                //         "Рио",
-                //         "Сантьяго"
-                //     },
-                //     cancellationToken: cancellationToken);
 
-                //}
                 if ((text.Trim().Length < 2))
                 {
-                    _ = await Task.Factory.StartNew(async () =>
-                    {
-                        // string texto = @"<b>bold</b>, <strong> bold </strong>" +
-                        //@"<i> italic </i>, <em> italic </em>" +
-                        //@"<a href = 'https://t.me/winnersDV2022flood/3'></a>"+
-                        //@"<a href = 'tg://user?id=123456789'> inline mention of a user</a>" +
-                        //@"<code> inline fixed-width code </code>" +
-                        //@"<pre> pre - formatted fixed-width code block</pre>";
-
-                        //Message result = await botClient.SendTextMessageAsync(message.Chat, texto, disableWebPagePreview: true, cancellationToken: cancellationToken);
-                        //await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
-                        //await Task.Delay(10000);
-                        //await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-
-                        Message result = await botClient.SendTextMessageAsync(message.Chat, $"Нарушение п. 13 правил." +
-                       $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", disableWebPagePreview: true, cancellationToken: cancellationToken);
-                        await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
-                        await Task.Delay(10000);
-                        await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-                    });
-
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
+                       $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 30), disableWebPagePreview: true, cancellationToken: cancellationToken);
                     return;
                 }
                 else
                 {
                     string trimmedText = text.Remove(text.Length - 1, 1);
                     bool res = long.TryParse(trimmedText.Trim(), out long temp);
-                    if (res && message.Type == Telegram.Bot.Types.Enums.MessageType.Text)
+                    if (res && message.Type == MessageType.Text)
                     {
                         _ = await Task.Factory.StartNew(async () =>
                         {
@@ -380,31 +200,18 @@ namespace TelBotApplication.Clients
                                 return;
                             }
                         });
+                        return;
                     }
-                    #region Text Auto Answer
-                    //_ = await Task.Factory.StartNew(async () =>
-                    //{
-                    //    //         string texto = @"<b>bold</b>, <strong> bold </strong>" +
-                    //    //@"<i> italic </i>, <em> italic </em>" +
-                    //    //@"<a href = 'https://t.me/winnersDV2022flood/3'></a>"
-                    //    //@"<a href = 'tg://user?id=123456789'> inline mention of a user</a>" +
-                    //    //@"<code> inline fixed-width code </code>" +
-                    //    //@"<pre> pre - formatted fixed-width code block</pre>";
 
+                    if (_textFilter.IsAlertFrase(text.Trim().ToLower()))
+                    {
+                        await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.GetFullName()}</b>, это нарушение п. 13 правил." +
+                    $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10),
+                    parseMode: ParseMode.Html, disableWebPagePreview: true, cancellationToken: cancellationToken);
+                        return;
+                    }
 
-                    //    bool spam = _fludFilter.CheckIsSpam(update.Message.Text.Trim());
-                    //    bool spam_or_ham = _fludFilter.CheckIsSpamOrHam(update.Message.Text.Trim());
-                    //    Message result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
-                    //                                   $@"<pre>Спасибо за сообщение, дорогой(ая) <b>{message.From.FirstName} {message.From.LastName}</b>  is spam = {spam}; is spam_or_ham= {spam_or_ham}</pre>",
-                    //                                  parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-                    //    await Task.Delay(2000, cancellationToken);
-                    //    await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-                    //}, cancellationToken).ConfigureAwait(false);
-                    #endregion Text Auto Answer
                 }
-                //////////
-
 
                 return;
             }
@@ -477,7 +284,7 @@ namespace TelBotApplication.Clients
             #endregion Auto answer
 
 
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.CallbackQuery)
+            if (update.Type == UpdateType.CallbackQuery)
             {
                 long chatId = update.CallbackQuery.Message.Chat.Id;
                 int messId = update.CallbackQuery.Message.MessageId;
@@ -506,9 +313,146 @@ namespace TelBotApplication.Clients
                 }
             }
         }
+        private async Task _newmembersService_RestrictEvent(Message message, CancellationToken cancellationToken = default)
+        {
+            await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId, cancellationToken);
+            await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5), cancellationToken);
+            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
+                $@" < a href = 'https://t.me/winnersDV2022flood/3' >< /a > ", cancellationToken: cancellationToken);
+            await Task.Delay(5000, cancellationToken);
+            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+        }
+
+        private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default)
+        {
+            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{message.From.Username}," +
+                        $" пожалуйста выполни проверку на антиспам https://t.me/{message.From.Username ?? " "}/{message.MessageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
+            await Task.Delay(10000, cancellationToken);
+            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+        }
 
 
+        #region Start
+        private async Task RunBotPolling(CancellationToken cancellationToken)
+        {
+            ReceiverOptions receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = new Telegram.Bot.Types.Enums.UpdateType[]
+                {
 
+                },
+                ThrowPendingUpdates = true
+            };
+            QueuedUpdateReceiver updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
+
+            try
+            {
+                await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+                {
+                    if (update is Update message)
+                    {
+
+                        await HandleUpdateAsync(_bot, message, cancellationToken);
+                    }
+
+                }
+
+            }
+            catch { }
+        }
+        private async Task AddCommandsListForBot(CancellationToken cancellationToken)
+        {
+            while (true)
+            {
+                IEnumerable<VenueCommand> locations = await _commandService.VenueCommandServise.GetAllAsync();
+                IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
+                _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
+                _venueRequests = _mapper.Map<IEnumerable<VenueRequest>>(locations);
+                List<BotCommand> commandsList = new List<BotCommand>();
+                foreach (BotCommandDto item in _botCommands)
+                {
+                    commandsList.Add(new BotCommand
+                    {
+                        Command = item.Command,
+                        Description = item.Description
+                    });
+                }
+                foreach (VenueRequest item in _venueRequests)
+                {
+                    commandsList.Add(new BotCommand
+                    {
+                        Command = item.Command,
+                        Description = item.Title
+                    });
+                }
+                await _bot.SetMyCommandsAsync(commandsList, BotCommandScope.AllGroupChats(), languageCode: "en", cancellationToken);
+                await Task.Delay(new TimeSpan(0, 5, 0), cancellationToken);
+            }
+        }
+        #endregion
+
+        #region Inline buttons
+        private async void SendInlineAdmins(ITelegramBotClient botClient, ChatMember[] members, Telegram.Bot.Types.Chat chat, Message message, long chatId, CancellationToken cancellationToken)
+        {
+            IEnumerable<IEnumerable<InlineKeyboardButton>> btnArr = GetButtons(members);
+            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(btnArr);
+            // keyboard
+            await botClient.DeleteMessageAsync(chatId: chat, message.MessageId, cancellationToken);
+            _ = await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: "Вызов администратора",
+                replyMarkup: inlineKeyboard,
+                cancellationToken: cancellationToken);
+
+
+        }
+        private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtons(ChatMember[] members)
+        {
+            foreach (ChatMember member in members)
+            {
+                yield return new InlineKeyboardButton[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: $"{member.User.FirstName} {member.User.LastName}", callbackData: $"@{member.User.Username}")
+                };
+            }
+        }
+        private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtonsForHello()
+        {
+            foreach (string fruit in _fruitsArr)
+            {
+                yield return new InlineKeyboardButton[]
+                {
+                    InlineKeyboardButton.WithCallbackData(text: fruit, callbackData: fruit)
+                };
+            }
+        }
+        private async Task<Message> SendInAntiSpamline(ITelegramBotClient botClient, Message message, ChatUser user, string fruit, CancellationToken cancellationToken)
+        {
+
+            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
+               new[]
+               {
+                    new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData(text: "🍎", callbackData: "🍎"),
+                        InlineKeyboardButton.WithCallbackData(text: "🍌", callbackData: "🍌"),
+                        InlineKeyboardButton.WithCallbackData(text: "🍒", callbackData: "🍒"),
+                        InlineKeyboardButton.WithCallbackData(text: "🍍", callbackData: "🍍"),
+                        InlineKeyboardButton.WithCallbackData(text: "🍋", callbackData: "🍋"),
+                        InlineKeyboardButton.WithCallbackData(text: "🍉", callbackData: "🍉")
+                    }
+               });
+
+            Message messag = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: {user.GetFullName()}  @{user.UserName}, если ты " +
+                $"не БОТ и не СПАМЕР, пройди проверку, нажав на кнопку, где есть {fruit}", parseMode: ParseMode.Html, replyMarkup: keyboard,
+               cancellationToken: cancellationToken);
+
+            return messag;
+        }
+        #endregion
+
+
+       
 
         #region income
         private async Task UnsuccessfullNewMemberAddedWithRestrictAsync(ITelegramBotClient botClient, Update update, long chatId, int messId, CancellationToken cancellationToken)
@@ -532,10 +476,6 @@ namespace TelBotApplication.Clients
 
 
         #endregion income
-
-
-
-
         public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
         {
             if (exception is ApiRequestException)

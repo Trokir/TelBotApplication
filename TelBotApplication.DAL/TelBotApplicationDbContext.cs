@@ -11,7 +11,9 @@ namespace TelBotApplication.DAL
         public DbSet<BotCaller> BotCallers { get; set; }
         public DbSet<UserListener> UserListeners { get; set; }
         public DbSet<VenueCommand> VenueCommands { get; set; }
-
+        public DbSet<Admin> Admins { get; set; }
+        public DbSet<Group> Groups { get; set; }
+        public DbSet<MessageLogger> MessageLoggers { get; set; }
         public DbSet<MessageModel> MessageModels { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

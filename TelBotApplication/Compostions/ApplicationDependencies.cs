@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.Clients;
-using TelBotApplication.DAL;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.DAL.Services;
 using TelBotApplication.Domain.Interfaces;
 using TelBotApplication.Domain.ML;
@@ -15,8 +15,7 @@ namespace TelBotApplication.Compostions
         public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             _ = services.AddTransient<IBotCommandService, BotCommandService>()
-                .AddTransient<IVenueCommandServise, VenueCommandServise>()
-                .AddTransient<IUnitOfWork, UnitOfWork>()
+                .AddTransient<ITextFilter, TextFilter>()
                 .AddSingleton<ISpamConfiguration, SpamConfiguration>()
                 .AddSingleton<BotClientService>()
                 .AddScoped<IFludFilter, FludFilter>()

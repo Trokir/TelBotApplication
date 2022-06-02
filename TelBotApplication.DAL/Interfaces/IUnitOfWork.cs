@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using TelBotApplication.DAL.Services;
 
-namespace TelBotApplication.DAL
+namespace TelBotApplication.DAL.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {

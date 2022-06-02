@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using TelBotApplication.Domain.Chats;
 using TelBotApplication.Domain.Interfaces;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelBotApplication.Domain.NewFolder.Executors
@@ -31,7 +30,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors
         {
             if (!_members.Any(x => x.Message == message))
             {
-                var result = _members.TryAdd(new Member { Message = message, AddDate = addDate });
+                bool result = _members.TryAdd(new Member { Message = message, AddDate = addDate });
                 if (result)
                 {
                     return;
@@ -43,7 +42,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors
         {
             if (_members.Any(x => x.Message.MessageId == message.MessageId))
             {
-                var member = _members.FirstOrDefault(x => x.Message.MessageId == message.MessageId);
+                Member member = _members.FirstOrDefault(x => x.Message.MessageId == message.MessageId);
                 RemoveMember(_members, member);
                 Thread.Sleep(200);
             }
@@ -53,12 +52,15 @@ namespace TelBotApplication.Domain.NewFolder.Executors
             lock (self)
             {
                 Member comparedItem;
-                var itemsList = new List<Member>();
+                List<Member> itemsList = new List<Member>();
                 do
                 {
-                    var result = self.TryTake(out comparedItem);
+                    bool result = self.TryTake(out comparedItem);
                     if (!result)
+                    {
                         return false;
+                    }
+
                     if (!comparedItem.Equals(itemToRemove))
                     {
                         itemsList.Add(comparedItem);
@@ -76,9 +78,9 @@ namespace TelBotApplication.Domain.NewFolder.Executors
             {
                 while (true)
                 {
-                    foreach (var member in _members.ToList())
+                    foreach (Member member in _members.ToList())
                     {
-                        var diffInSeconds = (DateTime.Now - member.AddDate).TotalSeconds;
+                        double diffInSeconds = (DateTime.Now - member.AddDate).TotalSeconds;
                         if (diffInSeconds >= 15 && diffInSeconds < 17 && !member.IsAlerted && !member.IsRestricted)
                         {
                             await AlertEvent?.Invoke(member.Message);

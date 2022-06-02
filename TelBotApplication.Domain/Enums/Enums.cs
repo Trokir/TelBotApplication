@@ -12,4 +12,10 @@
         Spam = 1,
         Ham = 2
     }
+    public enum TypeOfMessageLog
+    {
+        Added,
+        Edited,
+        Deleted
+    }
 }

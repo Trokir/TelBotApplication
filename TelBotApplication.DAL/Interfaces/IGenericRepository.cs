@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace TelBotApplication.DAL
+namespace TelBotApplication.DAL.Interfaces
 {
     public interface IGenericRepository<T> where T : class
     {
