@@ -3,8 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.Clients;
 using TelBotApplication.DAL;
 using TelBotApplication.DAL.Services;
-using TelBotApplication.Domain.Abstraction;
-using TelBotApplication.Domain.Chats;
+using TelBotApplication.Domain.Interfaces;
+using TelBotApplication.Domain.ML;
+using TelBotApplication.Domain.NewFolder.Executors;
 using TelBotApplication.Filters;
 
 namespace TelBotApplication.Compostions

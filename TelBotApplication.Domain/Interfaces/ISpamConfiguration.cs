@@ -1,4 +1,4 @@
-﻿namespace TelBotApplication.Domain.Abstraction
+﻿namespace TelBotApplication.Domain.Interfaces
 {
     public interface ISpamConfiguration
     {

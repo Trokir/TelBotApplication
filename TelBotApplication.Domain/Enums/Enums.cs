@@ -4,7 +4,8 @@
     {
         Text = 1,
         Animation = 2,
-        Venue = 3
+        Venue = 3,
+        Photo =4
     }
     public enum TypeOfMessage
     {

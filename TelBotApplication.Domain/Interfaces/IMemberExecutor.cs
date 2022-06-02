@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Telegram.Bot.Types;
-using static TelBotApplication.Domain.Chats.MemberExecutor;
+using static TelBotApplication.Domain.NewFolder.Executors.MemberExecutor;
 
-namespace TelBotApplication.Domain.Chats
+namespace TelBotApplication.Domain.Interfaces
 {
     public interface IMemberExecutor
     {

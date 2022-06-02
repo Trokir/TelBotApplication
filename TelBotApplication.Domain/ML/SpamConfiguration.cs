@@ -1,8 +1,9 @@
 ﻿
 using System;
 using System.IO;
+using TelBotApplication.Domain.Interfaces;
 
-namespace TelBotApplication.Domain.Abstraction
+namespace TelBotApplication.Domain.ML
 {
     public class SpamConfiguration : ISpamConfiguration
     {

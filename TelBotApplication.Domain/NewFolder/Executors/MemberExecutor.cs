@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TelBotApplication.Domain.Chats;
+using TelBotApplication.Domain.Interfaces;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace TelBotApplication.Domain.Chats
+namespace TelBotApplication.Domain.NewFolder.Executors
 {
     public class MemberExecutor : IMemberExecutor
     {
@@ -27,7 +29,7 @@ namespace TelBotApplication.Domain.Chats
 
         public void AddNewMember(Message message, DateTime addDate)
         {
-            if (!_members.Any(x => x.Message==message))
+            if (!_members.Any(x => x.Message == message))
             {
                 var result = _members.TryAdd(new Member { Message = message, AddDate = addDate });
                 if (result)
@@ -61,7 +63,7 @@ namespace TelBotApplication.Domain.Chats
                     {
                         itemsList.Add(comparedItem);
                     }
-                } while (!(comparedItem.Equals(itemToRemove)));
+                } while (!comparedItem.Equals(itemToRemove));
                 Parallel.ForEach(itemsList, t => self.Add(t));
             }
             return true;

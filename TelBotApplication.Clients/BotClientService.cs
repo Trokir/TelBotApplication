@@ -12,7 +12,9 @@ using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Enums;
+using TelBotApplication.Domain.Interfaces;
 using TelBotApplication.Domain.Models;
+using TelBotApplication.Domain.NewFolder.Executors.Extensions;
 using TelBotApplication.Filters;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
@@ -155,22 +157,11 @@ namespace TelBotApplication.Clients
         #endregion
 
         #region Reactions
-        private async Task SendReactionByBotCommandWithAnimationAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Chat chat, Message message, string link = "", string caption = "", CancellationToken cancellationToken = default)
-        {
-            Message result = await botClient.SendAnimationAsync(chatId: chat, animation: link, caption: caption, cancellationToken: cancellationToken);
-            await botClient.DeleteMessageAsync(chatId: chat, message.MessageId, cancellationToken);
-            await Task.Delay(30000);
-            await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-        }
-        private async Task SendReactionByBotCommandWithTextAsync(ITelegramBotClient botClient, Telegram.Bot.Types.Chat chat, Message message, ChatUser user, string link = "", string caption = "", CancellationToken cancellationToken = default)
-        {
-            Message result = await botClient.SendTextMessageAsync(message.Chat, $" {caption} {user.GetFullName()} !", cancellationToken: cancellationToken);
-            await botClient.DeleteMessageAsync(chatId: chat, message.MessageId, cancellationToken);
-            await Task.Delay(30000);
-            await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-        }
+      
+      
         private async Task SendReactionByBotCommandWithLocationAsync(ITelegramBotClient botClient, Message message, string text, CancellationToken cancellationToken)
         {
+           
             _ = await Task.Factory.StartNew(async () =>
             {
                 VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
@@ -263,19 +254,21 @@ namespace TelBotApplication.Clients
             {
                 if (text != null && _botCommands.Any(x => text.Contains(x.Command.ToLower().Trim())))
                 {
-                    _ = await Task.Factory.StartNew(async () =>
-                    {
-                        BotCommandDto command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
+                    
+                        var command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.ToLower().Trim()));
                         switch (command.TypeOfreaction)
                         {
                             case TypeOfreactions.Text:
-                                await SendReactionByBotCommandWithTextAsync(botClient, message.Chat, message, user, "", command.Caption, cancellationToken);
+                                await botClient.SendTextMessageWhithDelayAsync(isEnabled:true, message, message.Chat, $" {command.Caption} {user.GetFullName()} !", new TimeSpan(0, 0, 30), cancellationToken: cancellationToken);
                                 return;
                             case TypeOfreactions.Animation:
-                                await SendReactionByBotCommandWithAnimationAsync(botClient, message.Chat, message, command.Link, command.Caption, cancellationToken);
+                                await botClient.SendAnimationWhithDelayAsync(isEnabled: true, message, message.Chat, animation: command.Link, new TimeSpan(0, 0, 30), caption: command.Caption, cancellationToken: cancellationToken);
                                 return;
-                        }
-                    }, cancellationToken);
+                        case TypeOfreactions.Photo:
+                            await botClient.SendPhotoWhithDelayAsync(delay: new TimeSpan(0, 0, 30), message.Chat, photo: command.Link, isEnabled: true, caption: command.Caption, cancellationToken: cancellationToken);
+                            return;
+                    }
+                   
                 }
 
                 if (text != null && _venueRequests.Any(x => text.Contains(x.Command.ToLower().Trim())))
@@ -289,7 +282,7 @@ namespace TelBotApplication.Clients
                 {
                     int count = await botClient.GetChatMemberCountAsync(message.Chat, cancellationToken);
                     ChatMember[] countAdmins = await botClient.GetChatAdministratorsAsync(message.Chat, cancellationToken);
-                    await SendReactionByBotCommandWithTextAsync(botClient, message.Chat, message, user, "", $"В чате юзеров {count} ; администраторов {countAdmins.Length}  от ", cancellationToken);
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"В чате юзеров {count} ; администраторов {countAdmins.Length}  от {user.GetFullName()}",new TimeSpan(0,0,30), cancellationToken: cancellationToken);
                     return;
                 }
 
@@ -314,8 +307,9 @@ namespace TelBotApplication.Clients
                     return;
                 }
                 if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.ChatMemberLeft)
-                { 
-                    await SendReactionByBotCommandWithAnimationAsync(botClient, message.Chat, message, "https://i.gifer.com/ABMO.gif", $"Прощай дорогой {user.GetFullName()}.\n Нам будет тебя не хватать (((((");
+                {
+                    await botClient.SendAnimationWhithDelayAsync(isEnabled: true, message, message.Chat, animation: "https://i.gifer.com/ABMO.gif",
+                        new TimeSpan(0, 0, 30), caption: $"Прощай дорогой {user.GetFullName()}.\n Нам будет тебя не хватать (((((", cancellationToken: cancellationToken);
                     return;
                 }
             }
