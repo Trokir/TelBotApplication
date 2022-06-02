@@ -16,49 +16,39 @@ namespace TelBotApplication.DAL.Services
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<BotCaller>> GetAllCommandsAsync()
+        public async Task AddAsync(BotCaller entity)
         {
-            return await _dbContext.BotCallers.AsNoTracking().ToListAsync();
-        }
-
-        public async Task AddNewCommandAsync(BotCaller caller)
-        {
-            _ = await _dbContext.BotCallers.AddAsync(caller);
+            _ = await _dbContext.BotCallers.AddAsync(entity);
             _ = await _dbContext.SaveChangesAsync();
         }
-        public async Task DeleteCommandByCommandAsync(string command)
-        {
-            BotCaller entity = await _dbContext.BotCallers.SingleAsync(x => x.Command.Equals(command));
-            if (entity != null)
-            {
-                _ = _dbContext.BotCallers.Remove(entity);
-                _ = await _dbContext.SaveChangesAsync();
-            }
 
-        }
-        public async Task DeleteCommandByIdAsync(int id)
+        public async Task DeleteAsync(BotCaller entity)
         {
-            BotCaller entity = await _dbContext.BotCallers.SingleAsync(x => x.Id == id);
-            if (entity != null)
-            {
-                _ = _dbContext.BotCallers.Remove(entity);
-                _ = await _dbContext.SaveChangesAsync();
-            }
-
-        }
-
-        public async Task<BotCaller> UpdateEntityAsync(BotCaller entity)
-        {
-            _ = _dbContext.BotCallers.Update(entity);
+            _ = _dbContext.BotCallers.Remove(entity);
             _ = await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<BotCaller> GetByIdAsync(int id)
+        {
+            BotCaller entity = await _dbContext.BotCallers.FindAsync(id);
             return entity;
         }
 
-        public async Task<IEnumerable<BotCaller>> UpdateEntitiesListAsync(IEnumerable<BotCaller> commandsList)
+        public async Task<IEnumerable<BotCaller>> GetAllAsync()
         {
-            _dbContext.BotCallers.UpdateRange(commandsList);
+            return await _dbContext.BotCallers.ToListAsync();
+        }
+
+        public async Task UpdateAsync(BotCaller entity)
+        {
+            _ = _dbContext.BotCallers.Update(entity);
             _ = await _dbContext.SaveChangesAsync();
-            return commandsList;
+        }
+
+        public async Task UpdateListAsync(IEnumerable<BotCaller> entities)
+        {
+            _dbContext.BotCallers.UpdateRange(entities);
+            _ = await _dbContext.SaveChangesAsync();
         }
     }
 }

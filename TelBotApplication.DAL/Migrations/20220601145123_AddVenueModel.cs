@@ -4,29 +4,31 @@
 
 namespace TelBotApplication.DAL.Migrations
 {
-    public partial class AddMessageModel : Migration
+    public partial class AddVenueModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             _ = migrationBuilder.CreateTable(
-                name: "MessageModels",
+                name: "VenueCommands",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Message = table.Column<string>(type: "TEXT", nullable: false),
-                    TypeOfMessage = table.Column<int>(type: "INTEGER", nullable: false)
+                    Latitude = table.Column<float>(type: "REAL", nullable: false),
+                    Longitude = table.Column<float>(type: "REAL", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Address = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    _ = table.PrimaryKey("PK_MessageModels", x => x.Id);
+                    _ = table.PrimaryKey("PK_VenueCommands", x => x.Id);
                 });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             _ = migrationBuilder.DropTable(
-                name: "MessageModels");
+                name: "VenueCommands");
         }
     }
 }

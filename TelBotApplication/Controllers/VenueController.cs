@@ -10,11 +10,11 @@ namespace TelBotApplication.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BotCommandController : ControllerBase
+    public class VenueController : ControllerBase
     {
         private readonly IUnitOfWork _commandService;
         private readonly IMapper _mapper;
-        public BotCommandController(IUnitOfWork commandService, IMapper mapper)
+        public VenueController(IUnitOfWork commandService, IMapper mapper)
         {
             _commandService = commandService;
             _mapper = mapper;
@@ -24,9 +24,9 @@ namespace TelBotApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
-        public async Task<ActionResult<IEnumerable<BotCaller>>> GetAllCommandsAsync()
+        public async Task<ActionResult<IEnumerable<VenueCommand>>> GetAllCommandsAsync()
         {
-            IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
+            IEnumerable<VenueCommand> list = await _commandService.VenueCommandServise.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
@@ -35,10 +35,10 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
-        public async Task<ActionResult<BotCaller>> AddnewCommandAsync(BotCallerRequest botCallerRequest)
+        public async Task<ActionResult<VenueCommand>> AddnewCommandAsync(VenueRequest botCallerRequest)
         {
-            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
-            await _commandService.BotCommandService.AddAsync(command);
+            VenueCommand command = _mapper.Map<VenueCommand>(botCallerRequest);
+            await _commandService.VenueCommandServise.AddAsync(command);
             return Ok();
         }
         /// <summary>
@@ -47,28 +47,27 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
-        public async Task<ActionResult> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
+        public async Task<ActionResult> UpdateCommandAsync(VenueRequestUpdate botCallerRequest)
         {
-            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
-            await _commandService.BotCommandService.UpdateAsync(command);
+            VenueCommand command = _mapper.Map<VenueCommand>(botCallerRequest);
+            await _commandService.VenueCommandServise.UpdateAsync(command);
             return Ok();
         }
 
         [HttpPut("updatelist")]
-        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
+        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<VenueRequestUpdate> botCallerRequestsList)
         {
-            IEnumerable<BotCaller> commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
-            await _commandService.BotCommandService.UpdateListAsync(commandsList);
+            IEnumerable<VenueCommand> commandsList = _mapper.Map<IEnumerable<VenueCommand>>(botCallerRequestsList);
+            await _commandService.VenueCommandServise.UpdateListAsync(commandsList);
             return Ok();
         }
 
         [HttpDelete("deletebyid")]
         public async Task<ActionResult> DeleteCommandByIdAsync(int id)
         {
-            BotCaller entity = await _commandService.BotCommandService.GetByIdAsync(id);
-            await _commandService.BotCommandService.DeleteAsync(entity);
+            VenueCommand entity = await _commandService.VenueCommandServise.GetByIdAsync(id);
+            await _commandService.VenueCommandServise.DeleteAsync(entity);
             return Ok();
         }
-
     }
 }

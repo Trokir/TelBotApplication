@@ -3,7 +3,8 @@
     public enum TypeOfreactions
     {
         Text = 1,
-        Animation = 2
+        Animation = 2,
+        Venue = 3
     }
     public enum TypeOfMessage
     {

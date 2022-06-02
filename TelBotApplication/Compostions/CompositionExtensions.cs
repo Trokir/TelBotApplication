@@ -9,7 +9,7 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-           
+
             EnvironmentBotConfiguration botConfig = new EnvironmentBotConfiguration();
             configuration.GetSection("BotConfig").Bind(botConfig);
             _ = services.AddSingleton(Options.Create(botConfig));

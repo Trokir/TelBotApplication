@@ -2,9 +2,8 @@
 
 namespace TelBotApplication.DAL.Services
 {
-    public interface IBotCommandService : IGenericRepository<BotCaller>
+    public interface IVenueCommandServise : IGenericRepository<VenueCommand>
     {
-
 
     }
 }

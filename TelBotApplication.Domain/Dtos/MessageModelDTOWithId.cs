@@ -8,4 +8,5 @@ namespace TelBotApplication.Domain.Dtos
         public string Message { get; set; }
         public TypeOfMessage TypeOfMessage { get; set; }
     }
+
 }

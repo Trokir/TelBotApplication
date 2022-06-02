@@ -7,9 +7,9 @@ namespace TelBotApplication.Domain.Models
     {
         public int Id { get; set; }
         [Required]
-       
-        [MinLength(30,ErrorMessage = "Message must be longer then 30 characters")]
-      
+
+        [MinLength(30, ErrorMessage = "Message must be longer then 30 characters")]
+
         public string Message { get; set; }
         public TypeOfMessage TypeOfMessage { get; set; }
     }

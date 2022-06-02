@@ -5,7 +5,7 @@ using Microsoft.ML.Trainers;
 
 namespace TelBotApplication_Filters
 {
-    public partial class Spamers
+    public partial class SpamOrHam
     {
         public static ITransformer RetrainPipeline(MLContext context, IDataView trainData)
         {
@@ -27,7 +27,7 @@ namespace TelBotApplication_Filters
                                     .Append(mlContext.Transforms.Concatenate(@"Features", new[] { @"col1" }))
                                     .Append(mlContext.Transforms.Conversion.MapValueToKey(outputColumnName: @"col0", inputColumnName: @"col0"))
                                     .Append(mlContext.Transforms.NormalizeMinMax(@"Features", @"Features"))
-                                    .Append(mlContext.MulticlassClassification.Trainers.LbfgsMaximumEntropy(new LbfgsMaximumEntropyMulticlassTrainer.Options() { L1Regularization = 0.03125F, L2Regularization = 1.954098F, LabelColumnName = @"col0", FeatureColumnName = @"Features" }))
+                                    .Append(mlContext.MulticlassClassification.Trainers.OneVersusAll(binaryEstimator: mlContext.BinaryClassification.Trainers.LbfgsLogisticRegression(new LbfgsLogisticRegressionBinaryTrainer.Options() { L1Regularization = 0.03515041F, L2Regularization = 1.762164F, LabelColumnName = @"col0", FeatureColumnName = @"Features" }), labelColumnName: @"col0"))
                                     .Append(mlContext.Transforms.Conversion.MapKeyToValue(outputColumnName: @"PredictedLabel", inputColumnName: @"PredictedLabel"));
 
             return pipeline;
