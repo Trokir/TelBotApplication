@@ -20,7 +20,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
     public static class MessagesExtension
     {
 
-        public static async Task SendTextMessageWhithDelayAsync(this ITelegramBotClient botClient,bool isEnabled, Message message,
+        public static async Task SendTextMessageWhithDelayAsync(this ITelegramBotClient botClient, bool isEnabled, Message message,
             ChatId chatId,
             string text,
             TimeSpan delay,
@@ -37,16 +37,20 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return;
             }
-            Telegram.Bot.Types.Chat c = message.Chat;
-            Message result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
-               disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+            await Task.Factory.StartNew(async () =>
+            {
+                Telegram.Bot.Types.Chat c = message.Chat;
+                Message result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
+                   disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-        
+            });
+
+
         }
         public static async Task SendAnimationWhithDelayAsync(
-            this ITelegramBotClient botClient,bool isEnabled, Message message,
+            this ITelegramBotClient botClient, bool isEnabled, Message message,
             ChatId chatId,
             InputOnlineFile animation,
             TimeSpan delay,
@@ -67,13 +71,17 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return;
             }
-            Message result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
-                    animation: animation, duration: duration, width: width, height: height,
-                    thumb: thumb, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
-                    replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+            await Task.Factory.StartNew(async () =>
+            {
+                Message result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
+                                  animation: animation, duration: duration, width: width, height: height,
+                                  thumb: thumb, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
+                                  replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+            });
+
         }
 
         //public static async Task SendLocationWithDelayAsync(
@@ -126,14 +134,17 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             {
                 return;
             }
+            await Task.Factory.StartNew(async () =>
+            {
+                Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude,
+                              title: location.Title, address: location.Address,
+                              foursquareId: foursquareId, foursquareType: foursquareType, googlePlaceId: googlePlaceId, googlePlaceType: googlePlaceType,
+                              disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+                await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
+                await Task.Delay(delay, cancellationToken);
+                await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
+            });
 
-            Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude,
-                title: location.Title, address: location.Address, 
-                foursquareId: foursquareId,foursquareType:foursquareType, googlePlaceId: googlePlaceId, googlePlaceType: googlePlaceType,
-                disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
-            await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
-            await Task.Delay(delay,cancellationToken);
-            await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
         }
 
         public static async Task SendPhotoWithDelayAsync(
@@ -154,93 +165,97 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
         {
             if (!isEnabled)
             {
-                return ;
+                return;
             }
-            Message result = await botClient.SendPhotoAsync(chatId: chatId,
-                   photo:photo, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
-                    replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
+            await Task.Factory.StartNew(async () =>
+            {
+                Message result = await botClient.SendPhotoAsync(chatId: chatId,
+                                  photo: photo, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
+                                   replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+            });
+
         }
     }
 
 }
 #region enum
 //switch (Text)
-      //      {
-      //          case MessageType.Unknown:
-      //              break;
-      //          case MessageType.Text:
-      //              break;
-      //          case MessageType.Photo:
-      //              break;
-      //          case MessageType.Audio:
-      //              break;
-      //          case MessageType.Video:
-      //              break;
-      //          case MessageType.Voice:
-      //              break;
-      //          case MessageType.Document:
-      //              break;
-      //          case MessageType.Sticker:
-      //              break;
-      //          case MessageType.Location:
-      //              break;
-      //          case MessageType.Contact:
-      //              break;
-      //          case MessageType.Venue:
-      //              break;
-      //          case MessageType.Game:
-      //              break;
-      //          case MessageType.VideoNote:
-      //              break;
-      //          case MessageType.Invoice:
-      //              break;
-      //          case MessageType.SuccessfulPayment:
-      //              break;
-      //          case MessageType.WebsiteConnected:
-      //              break;
-      //          case MessageType.ChatMembersAdded:
-      //              break;
-      //          case MessageType.ChatMemberLeft:
-      //              break;
-      //          case MessageType.ChatTitleChanged:
-      //              break;
-      //          case MessageType.ChatPhotoChanged:
-      //              break;
-      //          case MessageType.MessagePinned:
-      //              break;
-      //          case MessageType.ChatPhotoDeleted:
-      //              break;
-      //          case MessageType.GroupCreated:
-      //              break;
-      //          case MessageType.SupergroupCreated:
-      //              break;
-      //          case MessageType.ChannelCreated:
-      //              break;
-      //          case MessageType.MigratedToSupergroup:
-      //              break;
-      //          case MessageType.MigratedFromGroup:
-      //              break;
-      //          case MessageType.Poll:
-      //              break;
-      //          case MessageType.Dice:
-      //              break;
-      //          case MessageType.MessageAutoDeleteTimerChanged:
-      //              break;
-      //          case MessageType.ProximityAlertTriggered:
-      //              break;
-      //          case MessageType.VoiceChatScheduled:
-      //              break;
-      //          case MessageType.VoiceChatStarted:
-      //              break;
-      //          case MessageType.VoiceChatEnded:
-      //              break;
-      //          case MessageType.VoiceChatParticipantsInvited:
-      //              break;
-      //          default:
-      //              break;
-      //      }
+//      {
+//          case MessageType.Unknown:
+//              break;
+//          case MessageType.Text:
+//              break;
+//          case MessageType.Photo:
+//              break;
+//          case MessageType.Audio:
+//              break;
+//          case MessageType.Video:
+//              break;
+//          case MessageType.Voice:
+//              break;
+//          case MessageType.Document:
+//              break;
+//          case MessageType.Sticker:
+//              break;
+//          case MessageType.Location:
+//              break;
+//          case MessageType.Contact:
+//              break;
+//          case MessageType.Venue:
+//              break;
+//          case MessageType.Game:
+//              break;
+//          case MessageType.VideoNote:
+//              break;
+//          case MessageType.Invoice:
+//              break;
+//          case MessageType.SuccessfulPayment:
+//              break;
+//          case MessageType.WebsiteConnected:
+//              break;
+//          case MessageType.ChatMembersAdded:
+//              break;
+//          case MessageType.ChatMemberLeft:
+//              break;
+//          case MessageType.ChatTitleChanged:
+//              break;
+//          case MessageType.ChatPhotoChanged:
+//              break;
+//          case MessageType.MessagePinned:
+//              break;
+//          case MessageType.ChatPhotoDeleted:
+//              break;
+//          case MessageType.GroupCreated:
+//              break;
+//          case MessageType.SupergroupCreated:
+//              break;
+//          case MessageType.ChannelCreated:
+//              break;
+//          case MessageType.MigratedToSupergroup:
+//              break;
+//          case MessageType.MigratedFromGroup:
+//              break;
+//          case MessageType.Poll:
+//              break;
+//          case MessageType.Dice:
+//              break;
+//          case MessageType.MessageAutoDeleteTimerChanged:
+//              break;
+//          case MessageType.ProximityAlertTriggered:
+//              break;
+//          case MessageType.VoiceChatScheduled:
+//              break;
+//          case MessageType.VoiceChatStarted:
+//              break;
+//          case MessageType.VoiceChatEnded:
+//              break;
+//          case MessageType.VoiceChatParticipantsInvited:
+//              break;
+//          default:
+//              break;
+//      }
 #endregion
 

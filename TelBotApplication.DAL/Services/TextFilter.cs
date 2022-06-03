@@ -10,10 +10,6 @@ namespace TelBotApplication.DAL.Services
     {
         private readonly HashSet<string> IfIntrestedWas = new HashSet<string>
         {
-            "интересное?",
-            "что-то?",
-            "что",
-            "было?",
             "что-нибудь",
             "сообщений",
             "новое?",
@@ -45,7 +41,7 @@ namespace TelBotApplication.DAL.Services
             if (arr.Any())
             {
                 HashSet<string> arrr = arr.Intersect(IfIntrestedWas).ToHashSet();
-                if (arrr.Any() && arrr.Count > 2)
+                if (arrr.Any() && arrr.Count > 3)
                 {
                     return true;
                 }
