@@ -13,10 +13,10 @@ namespace TelBotApplication.Compostions
             EnvironmentBotConfiguration botConfig = new EnvironmentBotConfiguration();
             configuration.GetSection("BotConfig").Bind(botConfig);
             _ = services.AddSingleton(Options.Create(botConfig));
-            string connection = configuration.GetConnectionString("DefaualtConnection");
-
-            return services.AddDalDependensies(connection).AddIntegrationDependencies(configuration)
-                ;
+            string connection = configuration.GetConnectionString("DefaultConnection");
+            
+            return services.AddDalDependensies(connection).AddIntegrationDependencies(configuration);
+                
         }
     }
 }

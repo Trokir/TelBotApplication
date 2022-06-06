@@ -5,7 +5,6 @@ using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.DAL.Services;
 using TelBotApplication.Domain.Interfaces;
 using TelBotApplication.Domain.ML;
-using TelBotApplication.Domain.NewFolder.Executors;
 using TelBotApplication.Filters;
 
 namespace TelBotApplication.Compostions
@@ -14,14 +13,15 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            _ = services.AddTransient<IBotCommandService, BotCommandService>()
+            _ = services
+                .AddTransient<IScopedProcessingService, ScopedProcessingService>()
+                .AddTransient<IBotCommandService, BotCommandService>()
                 .AddTransient<ITextFilter, TextFilter>()
                 .AddSingleton<ISpamConfiguration, SpamConfiguration>()
-                .AddSingleton<BotClientService>()
+                .AddTransient<BotClientService>()
                 .AddScoped<IFludFilter, FludFilter>()
-                .AddTransient<IMemberExecutor, MemberExecutor>()
             .AddHostedService(provider => provider.GetService<BotClientService>());
-             
+
 
             return services;
         }

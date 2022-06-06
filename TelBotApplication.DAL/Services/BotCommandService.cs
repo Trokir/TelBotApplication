@@ -19,37 +19,35 @@ namespace TelBotApplication.DAL.Services
 
         public async Task AddAsync(BotCaller entity)
         {
-            _ = await _dbContext.BotCallers.AddAsync(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.BotCallers.AddAsync(entity).ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(BotCaller entity)
         {
             _ = _dbContext.BotCallers.Remove(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
-
         public async Task<BotCaller> GetByIdAsync(int id)
         {
-            BotCaller entity = await _dbContext.BotCallers.FindAsync(id);
+                BotCaller entity = await _dbContext.BotCallers.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 
         public async Task<IEnumerable<BotCaller>> GetAllAsync()
         {
-            return await _dbContext.BotCallers.ToListAsync();
+            return await _dbContext.BotCallers.ToListAsync().ConfigureAwait(false);
         }
-
         public async Task UpdateAsync(BotCaller entity)
         {
             _ = _dbContext.BotCallers.Update(entity);
-            _ = await _dbContext.SaveChangesAsync();
+                    _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateListAsync(IEnumerable<BotCaller> entities)
         {
             _dbContext.BotCallers.UpdateRange(entities);
-            _ = await _dbContext.SaveChangesAsync();
+                    _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

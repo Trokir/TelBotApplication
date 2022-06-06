@@ -24,13 +24,13 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             ChatId chatId,
             string text,
             TimeSpan delay,
-            ParseMode? parseMode = default,
-            IEnumerable<MessageEntity>? entities = default,
-            bool? disableWebPagePreview = default,
-            bool? disableNotification = default,
-            int? replyToMessageId = default,
-            bool? allowSendingWithoutReply = default,
-            IReplyMarkup? replyMarkup = default,
+            ParseMode parseMode = ParseMode.Html,
+            IEnumerable<MessageEntity> entities = default,
+            bool disableWebPagePreview = default,
+            bool disableNotification = default,
+            int replyToMessageId = default,
+            bool allowSendingWithoutReply = default,
+            IReplyMarkup replyMarkup = default,
             CancellationToken cancellationToken = default)
         {
             if (!isEnabled)
@@ -39,13 +39,13 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             }
             await Task.Factory.StartNew(async () =>
             {
-                Telegram.Bot.Types.Chat c = message.Chat;
+                Chat c = message.Chat;
                 Message result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
                    disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            });
+            }, cancellationToken);
 
 
         }
@@ -54,17 +54,17 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             ChatId chatId,
             InputOnlineFile animation,
             TimeSpan delay,
-            int? duration = default,
-            int? width = default,
-            int? height = default,
-            InputMedia? thumb = default,
-            string? caption = default,
-            ParseMode? parseMode = default,
-            IEnumerable<MessageEntity>? captionEntities = default,
-            bool? disableNotification = default,
-            int? replyToMessageId = default,
-            bool? allowSendingWithoutReply = default,
-            IReplyMarkup? replyMarkup = default,
+             ParseMode parseMode = ParseMode.Html,
+            int duration = default,
+            int width = default,
+            int height = default,
+            InputMedia thumb = default,
+            string caption = default,
+            IEnumerable<MessageEntity> captionEntities = default,
+            bool disableNotification = default,
+            int replyToMessageId = default,
+            bool allowSendingWithoutReply = default,
+            IReplyMarkup replyMarkup = default,
             CancellationToken cancellationToken = default)
         {
             if (!isEnabled)
@@ -80,7 +80,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            });
+            }, cancellationToken);
 
         }
 
@@ -119,14 +119,14 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
              Message message,
              VenueRequest location,
              ChatId chatId,
-             string? foursquareId = default,
-             string? foursquareType = default,
-             string? googlePlaceId = default,
-             string? googlePlaceType = default,
-             bool? disableNotification = default,
-             int? replyToMessageId = default,
-             bool? allowSendingWithoutReply = default,
-             IReplyMarkup? replyMarkup = default,
+             string foursquareId = default,
+             string foursquareType = default,
+             string googlePlaceId = default,
+             string googlePlaceType = default,
+             bool disableNotification = default,
+             int replyToMessageId = default,
+             bool allowSendingWithoutReply = default,
+             IReplyMarkup replyMarkup = default,
              CancellationToken cancellationToken = default
          )
         {
@@ -143,7 +143,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
-            });
+            }, cancellationToken);
 
         }
 
@@ -154,13 +154,13 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             ChatId chatId,
             InputOnlineFile photo,
             bool isEnabled,
-            string? caption = default,
-            ParseMode? parseMode = default,
-            IEnumerable<MessageEntity>? captionEntities = default,
-            bool? disableNotification = default,
-            int? replyToMessageId = default,
-            bool? allowSendingWithoutReply = default,
-            IReplyMarkup? replyMarkup = default,
+            string caption = default,
+                ParseMode parseMode = ParseMode.Html,
+            IEnumerable<MessageEntity> captionEntities = default,
+            bool disableNotification = default,
+            int replyToMessageId = default,
+            bool allowSendingWithoutReply = default,
+            IReplyMarkup replyMarkup = default,
             CancellationToken cancellationToken = default)
         {
             if (!isEnabled)
@@ -175,7 +175,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
                 await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            });
+            }, cancellationToken);
 
         }
     }

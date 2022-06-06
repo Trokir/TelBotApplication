@@ -2,7 +2,7 @@
 
 namespace TelBotApplication.DAL.Interfaces
 {
-    public interface IGroupService:IGenericRepository<Group>
+    public interface IGroupService : IGenericRepository<Group>
     {
     }
 }

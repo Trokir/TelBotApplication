@@ -12,8 +12,8 @@ namespace TelBotApplication.Domain.Models
         public virtual int Id { get; set; }
         public virtual long ChatId { get; set; }
 
-        public  HashSet<Admin> Admins;
-        public HashSet<MessageLogger> MessageLoggers;
+        public ICollection<Admin> Admins;
+        public ICollection<MessageLogger> MessageLoggers;
 
     }
 }

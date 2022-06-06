@@ -26,7 +26,7 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task<int> Complete()
         {
-            return await _dbContext.SaveChangesAsync();
+            return await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
         public void Dispose()
         {

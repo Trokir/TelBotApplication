@@ -13,6 +13,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.DAL", "Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TelBotApplication.Filters", "TelBotApplication.Filters\TelBotApplication.Filters.csproj", "{0C06523B-EA53-4524-A026-F6DAD86E6633}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{167B2672-FC6A-4629-81F7-7FEC8870156A}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

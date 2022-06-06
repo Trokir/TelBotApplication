@@ -7,7 +7,7 @@ using TelBotApplication.Domain.Models;
 
 namespace TelBotApplication.DAL.Services
 {
-    public class MessageLoggerService: IMessageLoggerService
+    public class MessageLoggerService : IMessageLoggerService
     {
         private readonly TelBotApplicationDbContext _dbContext;
         private readonly ILogger<MessageLogger> _logger;
@@ -18,37 +18,37 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task AddAsync(MessageLogger entity)
         {
-            _ = await _dbContext.MessageLoggers.AddAsync(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.MessageLoggers.AddAsync(entity).ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(MessageLogger entity)
         {
             _ = _dbContext.MessageLoggers.Remove(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<MessageLogger> GetByIdAsync(int id)
         {
-            MessageLogger entity = await _dbContext.MessageLoggers.FindAsync(id);
+            MessageLogger entity = await _dbContext.MessageLoggers.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 
         public async Task<IEnumerable<MessageLogger>> GetAllAsync()
         {
-            return await _dbContext.MessageLoggers.ToListAsync();
+            return await _dbContext.MessageLoggers.ToListAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateAsync(MessageLogger entity)
         {
             _ = _dbContext.MessageLoggers.Update(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateListAsync(IEnumerable<MessageLogger> entities)
         {
             _dbContext.MessageLoggers.UpdateRange(entities);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

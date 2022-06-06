@@ -16,7 +16,7 @@ namespace TelBotApplication.DAL
                 .AddJsonFile("appsettings.Development.json")
                 .Build();
             DbContextOptionsBuilder<TelBotApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
-            string connection = configuration.GetConnectionString("DefaualtConnection");
+            string connection = configuration.GetConnectionString("DefaultConnection");
             _ = optionsBuilder.UseSqlite(connection);
             return new TelBotApplicationDbContext(optionsBuilder.Options);
         }

@@ -19,37 +19,37 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task AddAsync(Group entity)
         {
-            _ = await _dbContext.Groups.AddAsync(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.Groups.AddAsync(entity).ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(Group entity)
         {
             _ = _dbContext.Groups.Remove(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<Group> GetByIdAsync(int id)
         {
-            Group entity = await _dbContext.Groups.FindAsync(id);
+            Group entity = await _dbContext.Groups.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 
         public async Task<IEnumerable<Group>> GetAllAsync()
         {
-            return await _dbContext.Groups.ToListAsync();
+            return await _dbContext.Groups.ToListAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateAsync(Group entity)
         {
             _ = _dbContext.Groups.Update(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateListAsync(IEnumerable<Group> entities)
         {
             _dbContext.Groups.UpdateRange(entities);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }
