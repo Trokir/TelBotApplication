@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -7,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TelBotApplication.Clients.Hubs;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
@@ -27,12 +29,13 @@ namespace TelBotApplication.Clients
     {
         private readonly EnvironmentBotConfiguration _config;
         private readonly ILogger<BotClientService> _logger;
-        private IEnumerable<BotCommandDto> _botCommands;
-        private IEnumerable<VenueRequest> _venueRequests;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private IEnumerable<VenueRequest> _venueRequests;
+        private IEnumerable<BotCommandDto> _botCommands;
         private ChatMember[] _admins;
         private readonly ITextFilter _textFilter;
+        private readonly IHubContext<MemberHub, INewMember> _memberHub;
         private ITelegramBotClient _bot { get; set; }
         private readonly string[] _fruitsArr;
         private CallBackUser _callBackUser;
@@ -41,14 +44,13 @@ namespace TelBotApplication.Clients
         private ChatUser _incomingUser = default;
         private CancellationTokenSource cts;
         private CancellationTokenSource _ctsHello;
-
         public ScopedProcessingService(IServiceProvider serviceProvider,
         IOptions<EnvironmentBotConfiguration> options,
         ILogger<BotClientService> logger,
         IMapper mapper,
         ITextFilter textFilter,
-        IUnitOfWork unitOfWork
-        )
+        IUnitOfWork unitOfWork,
+            IHubContext<MemberHub, INewMember> memberHub)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
@@ -58,6 +60,7 @@ namespace TelBotApplication.Clients
             _rnd = new Random();
             _fruitsArr = new string[] { "🍎", "🍌", "🍒", "🍍", "🍋", "🍉" };
             _unitOfWork = unitOfWork;
+            _memberHub = memberHub;
         }
 
         public async Task DoWork(CancellationToken stoppingToken)
@@ -66,9 +69,35 @@ namespace TelBotApplication.Clients
             CancellationToken cancellationToken = cts.Token;
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
-
+          
 
             _ = await Task.WhenAny(pollingTask, dbUpdaterTask);
+        }
+
+
+        private void _memberExecutor_RestrictEvent(Message message, CancellationToken cancellationToken = default)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId, cancellationToken);
+                await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5), cancellationToken);
+                Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
+                    $@"https://t.me/winnersDV2022flood/3", cancellationToken: cancellationToken);
+                await Task.Delay(5000, cancellationToken);
+                await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+            });
+
+        }
+        private void _memberExecutor_AlertEvent(Message message, CancellationToken cancellationToken = default)
+        {
+            Task.Factory.StartNew(async () =>
+            {
+                Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
+                                          $" пожалуйста выполни проверку на антиспам https://t.me/{message.Chat.Username}/{_incomingUser.MessageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
+                await Task.Delay(10000, cancellationToken);
+                await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
+            });
+
         }
 
         #region Start
@@ -229,7 +258,7 @@ namespace TelBotApplication.Clients
 
             if (message?.Type != null && message.Type == MessageType.Text)
             {
-
+                await _memberHub.Clients.All.SayHello(text);
                 if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && message.From.Id == 1087968824 || _admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
@@ -381,23 +410,7 @@ namespace TelBotApplication.Clients
             }
         }
 
-        private async Task _newmembersService_RestrictEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId, cancellationToken);
-            await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5), cancellationToken);
-            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
-                $@"https://t.me/winnersDV2022flood/3", cancellationToken: cancellationToken);
-            await Task.Delay(5000, cancellationToken);
-            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-        }
 
-        private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
-                        $" пожалуйста выполни проверку на антиспам https://t.me/{message.Chat.Username}/{_incomingUser.MessageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
-            await Task.Delay(10000, cancellationToken);
-            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-        }
         #region Inline buttons
         private async void SendInlineAdmins(ITelegramBotClient botClient, ChatMember[] members, Telegram.Bot.Types.Chat chat, Message message, long chatId, CancellationToken cancellationToken)
         {

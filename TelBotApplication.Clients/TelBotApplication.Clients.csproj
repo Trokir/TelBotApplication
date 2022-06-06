@@ -6,6 +6,8 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="6.0.5" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
     <PackageReference Include="NServiceBus" Version="7.7.3" />
@@ -15,18 +17,5 @@
   <ItemGroup>
     <ProjectReference Include="..\TelBotApplication.DAL\TelBotApplication.DAL.csproj" />
     <ProjectReference Include="..\TelBotApplication.Domain\TelBotApplication.Domain.csproj" />
-    <ProjectReference Include="..\TelBotApplication.Filters\TelBotApplication.Filters.csproj" />
-  </ItemGroup>
-  <ItemGroup Label="spam">
-    <None Include="spam.consumption.cs">
-      <DependentUpon>spam.mbconfig</DependentUpon>
-    </None>
-    <None Include="spam.training.cs">
-      <DependentUpon>spam.mbconfig</DependentUpon>
-    </None>
-    <None Include="spam.zip">
-      <DependentUpon>spam.mbconfig</DependentUpon>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

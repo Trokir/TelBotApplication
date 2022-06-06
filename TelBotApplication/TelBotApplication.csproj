@@ -12,7 +12,6 @@
     <ProjectReference Include="..\TelBotApplication.Clients\TelBotApplication.Clients.csproj" />
     <ProjectReference Include="..\TelBotApplication.DAL\TelBotApplication.DAL.csproj" />
     <ProjectReference Include="..\TelBotApplication.Domain\TelBotApplication.Domain.csproj" />
-    <ProjectReference Include="..\TelBotApplication.Filters\TelBotApplication.Filters.csproj" />
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="Meziantou.Analyzer" Version="1.0.702">
