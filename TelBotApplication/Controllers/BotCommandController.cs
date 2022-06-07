@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using TelBotApplication.DAL.Services;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models;
 
@@ -12,11 +12,11 @@ namespace TelBotApplication.Controllers
     [ApiController]
     public class BotCommandController : ControllerBase
     {
-        private readonly IBotCommandService _botCommandService;
+        private readonly IUnitOfWork _commandService;
         private readonly IMapper _mapper;
-        public BotCommandController(IBotCommandService botCommandService, IMapper mapper)
+        public BotCommandController(IUnitOfWork commandService, IMapper mapper)
         {
-            _botCommandService = botCommandService;
+            _commandService = commandService;
             _mapper = mapper;
         }
         /// <summary>
@@ -26,7 +26,7 @@ namespace TelBotApplication.Controllers
         [HttpGet("getall")]
         public async Task<ActionResult<IEnumerable<BotCaller>>> GetAllCommandsAsync()
         {
-            var list = await _botCommandService.GetAllCommandsAsync();
+            IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
@@ -37,8 +37,8 @@ namespace TelBotApplication.Controllers
         [HttpPost("add")]
         public async Task<ActionResult<BotCaller>> AddnewCommandAsync(BotCallerRequest botCallerRequest)
         {
-            var command = _mapper.Map<BotCaller>(botCallerRequest);
-            await _botCommandService.AddNewCommandAsync(command);
+            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
+            await _commandService.BotCommandService.AddAsync(command);
             return Ok();
         }
         /// <summary>
@@ -47,30 +47,26 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
-        public async Task<ActionResult<BotCaller>> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
+        public async Task<ActionResult> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
         {
-            var command = _mapper.Map<BotCaller>(botCallerRequest);
-          var result=  await _botCommandService.UpdateEntityAsync(command);
-            return new OkObjectResult(result);
+            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
+            await _commandService.BotCommandService.UpdateAsync(command);
+            return Ok();
         }
 
         [HttpPut("updatelist")]
-        public async Task<ActionResult<IEnumerable<BotCaller>>> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
+        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
         {
-            var commandsList = _mapper.Map< IEnumerable<BotCaller>>(botCallerRequestsList);
-            var result = await _botCommandService.UpdateEntitiesListAsync(commandsList);
-            return new OkObjectResult(result);
-        }
-        [HttpDelete("deletebycommand")]
-        public async  Task<ActionResult> DeleteCommandByCommandAsync(string command)
-        {
-            await _botCommandService.DeleteCommandByCommandAsync(command);
+            IEnumerable<BotCaller> commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
+            await _commandService.BotCommandService.UpdateListAsync(commandsList);
             return Ok();
         }
+
         [HttpDelete("deletebyid")]
         public async Task<ActionResult> DeleteCommandByIdAsync(int id)
         {
-            await _botCommandService.DeleteCommandByIdAsync(id);
+            BotCaller entity = await _commandService.BotCommandService.GetByIdAsync(id);
+            await _commandService.BotCommandService.DeleteAsync(entity);
             return Ok();
         }
 

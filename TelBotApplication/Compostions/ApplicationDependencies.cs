@@ -1,22 +1,24 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.Clients;
+using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.DAL.Services;
-using TelBotApplication.Domain.Abstraction;
-
+using TelBotApplication.Domain.Interfaces;
+using TelBotApplication.Domain.ML;
 
 namespace TelBotApplication.Compostions
 {
     public static class ApplicationDependencies
     {
-        public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration, EnvironmentConfiguration environment)
+        public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddSingleton<UserMonutoringTelegramService>();
-            services.AddHostedService(provider => provider.GetService<UserMonutoringTelegramService>());
-            services.AddScoped<IBotCommandService, BotCommandService>();
-            services.AddTransient<BotClientService>();
-            services.AddHostedService(provider => provider.GetService<BotClientService>());
-          
+            _ = services           
+                .AddTransient<IScopedProcessingService, ScopedProcessingService>() 
+                .AddSingleton<ISpamConfiguration, SpamConfiguration>()
+                .AddSingleton<BotClientService>()
+                .AddHostedService(provider => provider.GetService<BotClientService>());
+
+
             return services;
         }
     }
