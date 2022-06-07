@@ -10,19 +10,25 @@ namespace TelBotApplication.DAL.Services
         private readonly TelBotApplicationDbContext _dbContext;
         private readonly ILogger<UnitOfWork> _logger;
         public IBotCommandService BotCommandService { get; }
-        public IVenueCommandServise VenueCommandServise { get; }
+        public IVenueCommandService VenueCommandServise { get; }
         public IAdminService AdminService { get; }
+        public IMessageLoggerService MessageLoggerService { get; }
+        public IGroupService GroupService { get; }
         public UnitOfWork(TelBotApplicationDbContext dbContext,
-           IBotCommandService botCommandService,
-            ILogger<UnitOfWork> logger,
-            IVenueCommandServise venueCommandServise,
-            IAdminService adminService)
+             ILogger<UnitOfWork> logger,
+            IBotCommandService botCommandService,
+            IVenueCommandService venueCommandServise,
+            IAdminService adminService,
+            IMessageLoggerService messageLoggerService,
+            IGroupService groupService)
         {
             _dbContext = dbContext;
             BotCommandService = botCommandService;
             _logger = logger;
             VenueCommandServise = venueCommandServise;
             AdminService = adminService;
+            MessageLoggerService = messageLoggerService;
+            GroupService = groupService;
         }
         public async Task<int> Complete()
         {

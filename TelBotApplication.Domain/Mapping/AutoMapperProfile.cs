@@ -10,6 +10,14 @@ namespace TelBotApplication.Domain.Mapping
     {
         public AutoMapperProfile()
         {
+            _ = CreateMap<Group, GroupRequestForUpdate>();
+            _ = CreateMap<GroupRequestForUpdate, Group>();
+            _ = CreateMap<GroupDTO, Group>();
+            _ = CreateMap<Group, GroupDTO>();
+            _ = CreateMap<Admin, AdminRequestForUpdate>();
+            _ = CreateMap<AdminRequestForUpdate, Admin>();
+            _ = CreateMap<AdminDTO, Admin>();
+            _ = CreateMap<Admin, AdminDTO>();
 
             _ = CreateMap<VenueRequest, VenueCommand>();
             _ = CreateMap<VenueCommand, VenueRequest>();

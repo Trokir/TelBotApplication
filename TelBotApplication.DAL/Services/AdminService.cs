@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Models;
@@ -51,5 +54,21 @@ namespace TelBotApplication.DAL.Services
             _dbContext.Admins.UpdateRange(entities);
             _ = await _dbContext.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<Admin>> GetAllAsync(Expression<Func<Admin, bool>> predicate)
+        {
+            return await _dbContext.Admins.Where(predicate).ToListAsync();
+        }
+        public async Task<Admin> FindIdAsync(Expression<Func<Admin, bool>> predicate)
+        {
+            return await _dbContext.Admins.Where(predicate).FirstOrDefaultAsync();
+        }
+        public async Task DeleteRangeAsync(Expression<Func<Admin, bool>> predicate)
+        {
+            var list = await _dbContext.Admins.Where(predicate).ToListAsync();
+            _dbContext.Admins.RemoveRange(list);
+            await _dbContext.SaveChangesAsync();
+        }
+       
     }
 }

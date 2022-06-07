@@ -1,8 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace TelBotApplication.Clients.Hubs
@@ -11,7 +7,8 @@ namespace TelBotApplication.Clients.Hubs
     {
         public async Task SendHelloFromNewMember(string message)
         {
-            await Clients.All.SayHello(message);
+            await Clients.All.SendLog(message);
         }
     }
+   
 }

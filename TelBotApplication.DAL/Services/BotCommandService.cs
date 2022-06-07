@@ -1,6 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Models;
@@ -11,7 +14,8 @@ namespace TelBotApplication.DAL.Services
     {
         private readonly TelBotApplicationDbContext _dbContext;
         private readonly ILogger<BotCommandService> _logger;
-        public BotCommandService(ILogger<BotCommandService> logger, TelBotApplicationDbContext dbContext)
+        public BotCommandService(ILogger<BotCommandService> logger,
+            TelBotApplicationDbContext dbContext)
         {
             _logger = logger;
             _dbContext = dbContext;
@@ -48,6 +52,21 @@ namespace TelBotApplication.DAL.Services
         {
             _dbContext.BotCallers.UpdateRange(entities);
                     _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<BotCaller>> GetAllAsync(Expression<Func<BotCaller, bool>> predicate)
+        {
+            return await _dbContext.BotCallers.Where(predicate).ToListAsync();
+        }
+        public async Task<BotCaller> FindIdAsync(Expression<Func<BotCaller, bool>> predicate)
+        {
+            return await _dbContext.BotCallers.Where(predicate).FirstOrDefaultAsync(); 
+        }
+        public async Task DeleteRangeAsync(Expression<Func<BotCaller, bool>> predicate)
+        {
+        var list = await _dbContext.BotCallers.Where(predicate).ToListAsync();
+            _dbContext.BotCallers.RemoveRange(list);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

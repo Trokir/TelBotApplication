@@ -1,31 +1,36 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using TelBotApplication.Clients;
 using TelBotApplication.Clients.Hubs;
+using TelBotApplication.DAL.Interfaces;
 
-namespace TelBotApplication.Clients.SignalR
+namespace MemberMessageClient
 {
-    public class MemberMessageClient : INewMember, IHostedService
+    public class MemberMessageHubClient : INewMember, IHostedService
     {
-        private readonly ILogger<MemberMessageClient> _logger;
-        private HubConnection _connection;
-        public MemberMessageClient(ILogger<MemberMessageClient> logger)
+        private readonly ILogger<MemberMessageHubClient> _logger;
+        private readonly IUnitOfWork _dbContext;
+        private readonly HubConnection _connection;
+        public MemberMessageHubClient(ILogger<MemberMessageHubClient> logger,
+            IUnitOfWork dbContext)
         {
+            _dbContext = dbContext;
             _logger = logger;
-
             _connection = new HubConnectionBuilder()
                 .WithUrl(Strings.HubUrl)
                 .Build();
 
-            _connection.On<string>(Strings.Events.MessageSent, SayHello);
+            _connection.On<string>(Strings.Events.MessageSent, SendLog);
+
         }
-        public Task SayHello(string message)
+
+
+        public Task SendLog(string message)
         {
             _logger.LogInformation("{CurrentMessage}", message);
-            Console.WriteLine(message);
+           ///* _dbConte*/xt.Me
             return Task.CompletedTask;
         }
         public async Task StartAsync(CancellationToken cancellationToken)

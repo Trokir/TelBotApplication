@@ -5,8 +5,11 @@ namespace TelBotApplication.DAL.Interfaces
 {
     public interface IUnitOfWork : IDisposable
     {
-        IBotCommandService BotCommandService { get; }
-        IVenueCommandServise VenueCommandServise { get; }
+        public IBotCommandService BotCommandService { get; }
+        public IVenueCommandService VenueCommandServise { get; }
+        public IAdminService AdminService { get; }
+        public IMessageLoggerService MessageLoggerService { get; }
+        public IGroupService GroupService { get; }
         Task<int> Complete();
     }
 }

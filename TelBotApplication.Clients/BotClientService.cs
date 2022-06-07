@@ -25,7 +25,7 @@ namespace TelBotApplication.Clients
                     scope.ServiceProvider
                         .GetRequiredService<IScopedProcessingService>();
 
-                await scopedProcessingService.DoWork(stoppingToken);
+                await scopedProcessingService.StartChatPolling(stoppingToken);
             }
         }
 

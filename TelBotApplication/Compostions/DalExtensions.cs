@@ -10,10 +10,12 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDalDependensies(this IServiceCollection services, string connectionString)
         {
-            services.AddTransient<IVenueCommandServise, VenueCommandServise>()
+            services.AddTransient<IVenueCommandService, VenueCommandService>()
                 .AddTransient<IAdminService, AdminService>()
                 .AddTransient<IGroupService, GroupService>()
                  .AddTransient<IMessageLoggerService, MessageLoggerService>()
+                  .AddTransient<IBotCommandService, BotCommandService>()
+                .AddTransient<IGroupService, GroupService>()
                 .AddTransient<IUnitOfWork, UnitOfWork>();
             services.AddScoped<TelBotApplicationDbContext>();
             services.AddDbContext<TelBotApplicationDbContext>(opt =>

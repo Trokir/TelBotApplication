@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -44,13 +45,16 @@ namespace TelBotApplication.Clients
         private ChatUser _incomingUser = default;
         private CancellationTokenSource cts;
         private CancellationTokenSource _ctsHello;
+
+
+
         public ScopedProcessingService(IServiceProvider serviceProvider,
         IOptions<EnvironmentBotConfiguration> options,
         ILogger<BotClientService> logger,
         IMapper mapper,
         ITextFilter textFilter,
         IUnitOfWork unitOfWork,
-            IHubContext<MemberHub, INewMember> memberHub)
+        IHubContext<MemberHub, INewMember> memberHub)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
@@ -61,17 +65,26 @@ namespace TelBotApplication.Clients
             _fruitsArr = new string[] { "🍎", "🍌", "🍒", "🍍", "🍋", "🍉" };
             _unitOfWork = unitOfWork;
             _memberHub = memberHub;
-        }
 
-        public async Task DoWork(CancellationToken stoppingToken)
+           
+        }
+        public async Task GetCallBackFromNewMemeber(string message)
+        {
+            _logger.LogInformation("{CurrentCallBack}", message);
+            var arr = message.Split(':');
+            await _bot.SendTextMessageAsync(chatId: arr[0], $"@ You {arr[5]}", replyToMessageId: int.Parse(arr[2]), disableWebPagePreview: true);
+
+           // await _memberHub.Clients.All.SayHello($"{message.Chat.Id}:{message.MessageId}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
+        }
+        public async Task StartChatPolling(CancellationToken stoppingToken)
         {
             cts = new CancellationTokenSource();
             CancellationToken cancellationToken = cts.Token;
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
-          
 
             _ = await Task.WhenAny(pollingTask, dbUpdaterTask);
+           
         }
 
 
@@ -258,7 +271,8 @@ namespace TelBotApplication.Clients
 
             if (message?.Type != null && message.Type == MessageType.Text)
             {
-                await _memberHub.Clients.All.SayHello(text);
+                await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{message.MessageId}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
+               
                 if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && message.From.Id == 1087968824 || _admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +

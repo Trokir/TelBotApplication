@@ -5,6 +5,6 @@ namespace TelBotApplication.Clients
 {
     public interface IScopedProcessingService
     {
-        Task DoWork(CancellationToken stoppingToken);
+        Task StartChatPolling(CancellationToken stoppingToken);
     }
 }

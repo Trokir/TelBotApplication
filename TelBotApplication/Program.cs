@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using TelBotApplication.Clients.Hubs;
-using TelBotApplication.Clients.SignalR;
 using TelBotApplication.Compostions;
 using TelBotApplication.Domain.Mapping;
 
@@ -15,7 +14,8 @@ builder.Services.AddDependencies(builder.Configuration);
 ConfigureServices(builder.Services);
 var app = builder.Build();
 ConfigureApp(app);
-app.MapHub<MemberHub>("/hubs/member");
+
+
 app.Run();
 
 
@@ -27,7 +27,6 @@ void ConfigureServices(IServiceCollection services)
         _ = config.AddConsole();
         //etc
     });
-
     MapperConfiguration mapperConfig = new MapperConfiguration(mc =>
     {
         mc.AddProfile(new AutoMapperProfile());
@@ -54,12 +53,12 @@ void ConfigureApp(WebApplication app)
     _ = app.UseHttpsRedirection();
     _ = app.UseStaticFiles();
     _ = app.UseRouting();
-    _ = app.UseAuthorization();
-
+    app.UseCors(config => config.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
     _ = app.UseEndpoints(endpoints =>
     {
+        endpoints.MapHub<MemberHub>("/hubs/member");
         _ = endpoints.MapControllers();
     });
 }
-    
- 
+
+
