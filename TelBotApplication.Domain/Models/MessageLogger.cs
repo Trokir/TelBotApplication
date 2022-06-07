@@ -7,6 +7,7 @@ namespace TelBotApplication.Domain.Models
     {
         public int Id { get; set; }
         public int GroupId { get; set; }
+        public long ChatId { get; set; }
         public string FullName { get; set; }
         public string UserName { get; set; }
         public string Message { get; set; }

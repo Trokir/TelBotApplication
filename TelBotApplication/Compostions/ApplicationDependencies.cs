@@ -12,11 +12,10 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            _ = services
+            _ = services           
                 .AddTransient<IScopedProcessingService, ScopedProcessingService>() 
-                .AddTransient<ITextFilter, TextFilter>()
                 .AddSingleton<ISpamConfiguration, SpamConfiguration>()
-                .AddTransient<BotClientService>()
+                .AddSingleton<BotClientService>()
                 .AddHostedService(provider => provider.GetService<BotClientService>());
 
 

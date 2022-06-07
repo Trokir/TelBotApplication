@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TelBotApplication.DAL;
 
@@ -10,9 +11,10 @@ using TelBotApplication.DAL;
 namespace TelBotApplication.DAL.Migrations
 {
     [DbContext(typeof(TelBotApplicationDbContext))]
-    partial class TelBotApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220607121233_UpdateMessage")]
+    partial class UpdateMessage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.5");

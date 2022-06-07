@@ -14,6 +14,7 @@ namespace TelBotApplication.Domain.Mapping
             _ = CreateMap<GroupRequestForUpdate, Group>();
             _ = CreateMap<GroupDTO, Group>();
             _ = CreateMap<Group, GroupDTO>();
+
             _ = CreateMap<Admin, AdminRequestForUpdate>();
             _ = CreateMap<AdminRequestForUpdate, Admin>();
             _ = CreateMap<AdminDTO, Admin>();

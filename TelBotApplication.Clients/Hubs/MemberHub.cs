@@ -5,7 +5,7 @@ namespace TelBotApplication.Clients.Hubs
 {
     public class MemberHub : Hub<INewMember>
     {
-        public async Task SendHelloFromNewMember(string message)
+        public async Task SendLog(string message)
         {
             await Clients.All.SendLog(message);
         }

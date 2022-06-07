@@ -10,15 +10,17 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddDalDependensies(this IServiceCollection services, string connectionString)
         {
-            services.AddTransient<IVenueCommandService, VenueCommandService>()
+            services
+                    .AddTransient<IVenueCommandService, VenueCommandService>()
                 .AddTransient<IAdminService, AdminService>()
                 .AddTransient<IGroupService, GroupService>()
                  .AddTransient<IMessageLoggerService, MessageLoggerService>()
                   .AddTransient<IBotCommandService, BotCommandService>()
                 .AddTransient<IGroupService, GroupService>()
-                .AddTransient<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<TelBotApplicationDbContext>();
-            services.AddDbContext<TelBotApplicationDbContext>(opt =>
+                .AddTransient<ITextFilter, TextFilter>()
+                .AddTransient<IUnitOfWork, UnitOfWork>()
+            .AddScoped<TelBotApplicationDbContext>()
+            .AddDbContext<TelBotApplicationDbContext>(opt =>
             opt.UseSqlite(connectionString));
             SQLitePCL.Batteries.Init();
             return services;

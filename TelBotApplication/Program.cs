@@ -3,24 +3,34 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System.IO;
+using System.Reflection;
 using TelBotApplication.Clients.Hubs;
-using TelBotApplication.Compostions;
 using TelBotApplication.Domain.Mapping;
+using Microsoft.Extensions.Configuration;
+using TelBotApplication.Compostions;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
-
 builder.Services.AddDependencies(builder.Configuration);
 ConfigureServices(builder.Services);
 var app = builder.Build();
 ConfigureApp(app);
+builder.Host.
+            ConfigureAppConfiguration((context, config) =>
+            {
+                config.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                config.AddJsonFile("appsettings.json", optional: true, false);
+                config.AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", true, false);
+                config.AddEnvironmentVariables();
 
-
+            });
 app.Run();
 
 
 void ConfigureServices(IServiceCollection services)
 {
+    
     _ = services.AddLogging(config =>
     {
         _ = config.AddDebug();

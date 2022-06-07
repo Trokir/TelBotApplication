@@ -5,6 +5,8 @@ using Microsoft.Extensions.Logging;
 using TelBotApplication.Clients;
 using TelBotApplication.Clients.Hubs;
 using TelBotApplication.DAL.Interfaces;
+using TelBotApplication.Domain.Enums;
+using TelBotApplication.Domain.Models;
 
 namespace MemberMessageClient
 {
@@ -13,8 +15,10 @@ namespace MemberMessageClient
         private readonly ILogger<MemberMessageHubClient> _logger;
         private readonly IUnitOfWork _dbContext;
         private readonly HubConnection _connection;
-        public MemberMessageHubClient(ILogger<MemberMessageHubClient> logger,
-            IUnitOfWork dbContext)
+        public MemberMessageHubClient(ILogger<MemberMessageHubClient> logger
+            ,
+            IUnitOfWork dbContext
+            )
         {
             _dbContext = dbContext;
             _logger = logger;
@@ -27,11 +31,33 @@ namespace MemberMessageClient
         }
 
 
-        public Task SendLog(string message)
+        public async Task SendLog(string message)
         {
-            _logger.LogInformation("{CurrentMessage}", message);
-           ///* _dbConte*/xt.Me
-            return Task.CompletedTask;
+           
+            var arr = message.Split(':');
+            if (arr is string[] array)
+            {
+                if (array.Any())
+                {
+                    var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
+                    if (group == null)
+                    {
+                        await _dbContext.GroupService.AddAsync(new Group { ChatId = long.Parse(array[0]) });
+                    }
+                    group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
+                    await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
+                    {
+                        GroupId = group.Id,
+                        FullName = array[2],
+                        UserName = array[3],
+                        Message = array[4],
+                        TypeOfMessageLog = TypeOfMessageLog.Added,
+                        ChatId = long.Parse(array[0]),
+                        Group =group
+                    }); 
+                }
+
+            }
         }
         public async Task StartAsync(CancellationToken cancellationToken)
         {
@@ -40,12 +66,14 @@ namespace MemberMessageClient
             {
                 try
                 {
+                    _logger.LogInformation("Started");
                     await _connection.StartAsync(cancellationToken);
 
                     break;
                 }
                 catch
                 {
+                    _logger.LogInformation("Error");
                     await Task.Delay(1000, cancellationToken);
                 }
             }

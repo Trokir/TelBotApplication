@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
+using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models;
 
 namespace TelBotApplication.DAL.Services

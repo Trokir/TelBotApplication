@@ -6,6 +6,5 @@ namespace TelBotApplication.Domain.Dtos
     {
         public string UserName { get; set; }
         public int GroupId { get; set; }
-        public virtual Group Group { get; set; }
     }
 }

@@ -83,7 +83,7 @@ namespace TelBotApplication.Clients
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
 
-            _ = await Task.WhenAny(pollingTask, dbUpdaterTask);
+             await Task.WhenAll(pollingTask, dbUpdaterTask);
            
         }
 
@@ -205,7 +205,7 @@ namespace TelBotApplication.Clients
             if (update.Type == UpdateType.Message)
             {
                 _admins = await botClient.GetChatAdministratorsAsync(update.Message.Chat);
-                if (text != null && _botCommands.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
+                if (text != null && _botCommands!=null && _botCommands.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
 
                     BotCommandDto command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -231,7 +231,24 @@ namespace TelBotApplication.Clients
 
                     return;
                 }
+              
 
+                if (chat_message.GetCurrentMessageText().Contains("/gay", StringComparison.OrdinalIgnoreCase))
+                {
+                    var number = _rnd.Next(1, 100);
+                    var linl = string.Empty;
+                    if (number >= 50)
+                    {
+                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - гей <b>высокая</b> -  {number}%";
+                    }
+                    else
+                    {
+                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} -  гей <b>низкая</b> -   {number}%";
+                    }
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, linl, new TimeSpan(0, 0, 30), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
+                       allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    return;
+                }
 
                 if (chat_message.GetCurrentMessageText().Contains("/stat", StringComparison.OrdinalIgnoreCase))
                 {
@@ -271,16 +288,16 @@ namespace TelBotApplication.Clients
 
             if (message?.Type != null && message.Type == MessageType.Text)
             {
-                await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{message.MessageId}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
+                await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
                
-                if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && message.From.Id == 1087968824 || _admins.Any(x => x.User.Id == message.From.Id)))
+                if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && /*message.From.Id == 1087968824 || */_admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
                        $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 30), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
                         allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                     return;
                 }
-                else if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && message.From.Id != 1087968824 && !_admins.Any(x => x.User.Id == message.From.Id)))
+                else if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase)  && !_admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.DeleteMessageAsync(message.Chat, message.MessageId, cancellationToken);
                     return;
