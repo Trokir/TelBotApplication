@@ -9,6 +9,10 @@ namespace TelBotApplication.Clients.Hubs
         {
             await Clients.All.SendLog(message);
         }
+        public async Task EditLog(string message)
+        {
+            await Clients.All.EditLog(message);
+        }
     }
    
 }

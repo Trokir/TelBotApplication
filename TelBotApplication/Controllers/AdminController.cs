@@ -25,6 +25,8 @@ namespace TelBotApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
+        [ProducesResponseType(StatusCodes.Status200OK,Type = typeof(IEnumerable<Admin>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<Admin>>> GetAllCommandsAsync()
         {
             IEnumerable<Admin> list = await _commandService.AdminService.GetAllAsync();
@@ -36,10 +38,12 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
-        public async Task<ActionResult<Admin>> AddnewCommandAsync(AdminDTO botCallerRequest)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Admin))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> AddnewCommandAsync(AdminDTO botCallerRequest)
         {
             var command = _mapper.Map<Admin>(botCallerRequest);
-            await _commandService.AdminService.AddAsync(command);
+           await _commandService.AdminService.AddAsync(command);
             return Ok();
         }
         /// <summary>
@@ -48,6 +52,8 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandAsync(AdminRequestForUpdate botCallerRequest)
         {
             var command = _mapper.Map<Admin>(botCallerRequest);
@@ -56,6 +62,8 @@ namespace TelBotApplication.Controllers
         }
 
         [HttpPut("updatelist")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<AdminRequestForUpdate> botCallerRequestsList)
         {
             IEnumerable<Admin> commandsList = _mapper.Map<IEnumerable<Admin>>(botCallerRequestsList);

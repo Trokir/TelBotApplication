@@ -9,6 +9,7 @@ namespace TelBotApplication.Clients
         public static class Events
         {
             public static string MessageSent => nameof(INewMember.SendLog);
+            public static string MessageEdited => nameof(INewMember.EditLog);
         }
     }
 }

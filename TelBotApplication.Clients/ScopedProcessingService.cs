@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
@@ -13,6 +12,7 @@ using TelBotApplication.Clients.Hubs;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
+using TelBotApplication.Domain.Commands;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Enums;
 using TelBotApplication.Domain.Models;
@@ -45,7 +45,7 @@ namespace TelBotApplication.Clients
         private ChatUser _incomingUser = default;
         private CancellationTokenSource cts;
         private CancellationTokenSource _ctsHello;
-
+        private List<UserRepeater> _counterKessages;
 
 
         public ScopedProcessingService(IServiceProvider serviceProvider,
@@ -65,8 +65,9 @@ namespace TelBotApplication.Clients
             _fruitsArr = new string[] { "🍎", "🍌", "🍒", "🍍", "🍋", "🍉" };
             _unitOfWork = unitOfWork;
             _memberHub = memberHub;
+            _counterKessages= new List<UserRepeater>();
 
-           
+
         }
         public async Task GetCallBackFromNewMemeber(string message)
         {
@@ -224,7 +225,7 @@ namespace TelBotApplication.Clients
 
                 }
 
-                if (text != null && _venueRequests.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
+                if (text != null && _venueRequests!=null && _venueRequests.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
                     VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
                     await botClient.SendVenueWithDelayAsync(true, new TimeSpan(0, 0, 30), message, location, message.Chat, cancellationToken: cancellationToken);
@@ -285,11 +286,41 @@ namespace TelBotApplication.Clients
                     return;
                 }
             }
+            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)
+            {
+                await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username??"no userName"}:{text}");
+                return;
+            }
 
             if (message?.Type != null && message.Type == MessageType.Text)
             {
                 await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
-               
+                if (_counterKessages.Count == 0 && message.ReplyToMessage?.MessageId != null)
+                {
+                    _counterKessages.Add(new UserRepeater { UserId = user.UserId, ReplyToMessageId = message.ReplyToMessage?.MessageId ?? 1 });
+                    
+                }
+
+                else if (_counterKessages.Count == 1 && message.ReplyToMessage?.MessageId != null && _counterKessages.Any(x => x.UserId == user.UserId && x.ReplyToMessageId == message.ReplyToMessage?.MessageId))
+                {
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, @$"<b>{user.FullName}</b>, это нарушение: несколько сообщений подряд в
+                        чат запрещено отправлять пунктом 2.2 правил.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10), parseMode: ParseMode.Html, replyToMessageId: message.MessageId,
+                   allowSendingWithoutReply: false, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    _counterKessages.Clear();
+                    return;
+                }
+                else if (_counterKessages.Count == 1 && !_counterKessages.Any(x => x.UserId == user.UserId))
+                {
+                    _counterKessages.Clear();
+                   
+                }
+                if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
+                {
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.FullName}</b>, это нарушение п. 13 правил." +
+                $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10),
+                 disableWebPagePreview: true, cancellationToken: cancellationToken);
+                    return;
+                }
                 if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && /*message.From.Id == 1087968824 || */_admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
@@ -331,13 +362,7 @@ namespace TelBotApplication.Clients
                         return;
                     }
 
-                    if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
-                    {
-                        await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.FullName}</b>, это нарушение п. 13 правил." +
-                    $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10),
-                     disableWebPagePreview: true, cancellationToken: cancellationToken);
-                        return;
-                    }
+                   
 
                 }
 
@@ -396,19 +421,7 @@ namespace TelBotApplication.Clients
             //    }, cancellationToken).ConfigureAwait(false);
             //    return;
             //}
-            //if (update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)
-            //{
-            //    _ = await Task.Factory.StartNew(async () =>
-            //    {
-            //        Message result = await botClient.SendTextMessageAsync(chatId: update.EditedMessage.Chat.Id,
-            //                                        $"Спасибо за исправление сообщения, дорогой(ая) {update.EditedMessage.From.FirstName} {update.EditedMessage.From.LastName} ",
-            //                                       parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-            //        await Task.Delay(2000, cancellationToken);
-            //        await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            //    }, cancellationToken).ConfigureAwait(false);
-            //    return;
-            //}
+            
             #endregion Auto answer
 
 
@@ -519,10 +532,17 @@ namespace TelBotApplication.Clients
 
         private static async Task SuccessfullNewMemberAddedAsync(ITelegramBotClient botClient, Update update, long chatId, int messId, CancellationToken cancellationToken)
         {
-            await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , приветствуем вас в ламповой и дружной флудилке! Здесь любят фудпорн, "
-                + $" троллить Джобса, сербскую еду, подгонять Данзана, а также йожек. Правила чата необходимо неукоснительно соблюдать!"
-                  , showAlert: true, url: null, cacheTime: 15, cancellationToken: cancellationToken);
-            await botClient.DeleteMessageAsync(chatId, messId, cancellationToken);
+            try
+            {
+                await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , приветствуем вас в ламповой и дружной флудилке! Здесь любят фудпорн, "
+                               + $" троллить Джобса, сербскую еду, подгонять Данзана, а также йожек. Правила чата необходимо неукоснительно соблюдать!"
+                                 , showAlert: true, url: null, cacheTime: 600, cancellationToken: cancellationToken);
+                await botClient.DeleteMessageAsync(chatId, messId, cancellationToken);
+            }
+            catch 
+            {
+            }
+           
         }
 
 

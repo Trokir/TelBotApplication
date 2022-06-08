@@ -27,17 +27,39 @@ namespace MemberMessageClient
                 .Build();
 
             _connection.On<string>(Strings.Events.MessageSent, SendLog);
-
+            _connection.On<string>(Strings.Events.MessageEdited, EditLog);
         }
 
+        public async Task EditLog(string message)
+        {
+            var arr = message.Split(':');
+            if (arr is string[] array)
+            {
+                if (array.Any() && array[4] != null && array[4].Length > 20)
+                {
+                   var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
+                    await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
+                    {
+                        GroupId = group.Id,
+                        FullName = array[2],
+                        UserName = array[3] ?? "no userName",
+                        Message = array[4],
+                        TypeOfMessageLog = TypeOfMessageLog.Edited,
+                        ChatId = long.Parse(array[0]),
+                        Group = group
+                    });
+                }
 
-        public async Task SendLog(string message)
+            }
+        }
+
+            public async Task SendLog(string message)
         {
            
             var arr = message.Split(':');
             if (arr is string[] array)
             {
-                if (array.Any())
+                if (array.Any() && array[4]!=null && array[4].Length>20)
                 {
                     var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
                     if (group == null)
@@ -49,7 +71,7 @@ namespace MemberMessageClient
                     {
                         GroupId = group.Id,
                         FullName = array[2],
-                        UserName = array[3],
+                        UserName = array[3]??"no userName",
                         Message = array[4],
                         TypeOfMessageLog = TypeOfMessageLog.Added,
                         ChatId = long.Parse(array[0]),
