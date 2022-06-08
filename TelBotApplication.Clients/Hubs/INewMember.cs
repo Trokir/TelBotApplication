@@ -6,6 +6,10 @@ namespace TelBotApplication.Clients.Hubs
     {
         Task SendLog(string message);
         Task EditLog(string message);
+        Task SendPhotoLog(string message);
+        Task SendDocumentlLog(string message);
+        Task SendStickerLog(string message);
+        Task SendVideoLog(string message);
     }
     
 }

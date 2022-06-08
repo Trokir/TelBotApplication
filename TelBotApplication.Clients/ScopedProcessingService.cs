@@ -286,9 +286,31 @@ namespace TelBotApplication.Clients
                     return;
                 }
             }
-            if (update.Type == Telegram.Bot.Types.Enums.UpdateType.EditedMessage)
+
+            if (update.Type == UpdateType.EditedMessage)
             {
                 await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username??"no userName"}:{text}");
+                return;
+            }
+          
+            if (message?.Type != null && message.Type == MessageType.Photo)
+            {
+                await _memberHub.Clients.All.SendPhotoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Photo"}");
+                return;
+            }
+            if (message?.Type != null && message.Type == MessageType.Video)
+            {
+                await _memberHub.Clients.All.SendVideoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Video"}");
+                return;
+            }
+            if (message?.Type != null && message.Type == MessageType.Document)
+            {
+                await _memberHub.Clients.All.SendDocumentlLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Gif"}");
+                return;
+            }
+            if (message?.Type != null && message.Type == MessageType.Sticker)
+            {
+                await _memberHub.Clients.All.SendStickerLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{message.Sticker.FileUniqueId}");
                 return;
             }
 
@@ -369,58 +391,7 @@ namespace TelBotApplication.Clients
                 return;
             }
             #region Auto answers
-            //if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Photo)
-            //{
-            //    _ = await Task.Factory.StartNew(async () =>
-            //    {
-            //        Message result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
-            //                                         $"Спасибо за фото, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
-            //                                        parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-            //        await Task.Delay(2000, cancellationToken);
-            //        await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            //    }, cancellationToken).ConfigureAwait(false);
-            //    return;
-            //}
-            //if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Video)
-            //{
-            //    _ = await Task.Factory.StartNew(async () =>
-            //    {
-            //        Message result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
-            //                                        $"Спасибо за видео, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
-            //                                       parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-            //        await Task.Delay(2000, cancellationToken);
-            //        await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            //    }, cancellationToken).ConfigureAwait(false);
-            //    return;
-            //}
-            //if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Document)
-            //{
-            //    _ = await Task.Factory.StartNew(async () =>
-            //    {
-            //        Message result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
-            //                                        $"Спасибо за документ, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
-            //                                       parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-            //        await Task.Delay(2000, cancellationToken);
-            //        await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            //    }, cancellationToken).ConfigureAwait(false);
-            //    return;
-            //}
-            //if (message?.Type != null && message.Type == Telegram.Bot.Types.Enums.MessageType.Sticker)
-            //{
-            //    _ = await Task.Factory.StartNew(async () =>
-            //    {
-            //        Message result = await botClient.SendTextMessageAsync(chatId: update.Message.Chat.Id,
-            //                                        $"Спасибо за стикер, дорогой(ая) {message.From.FirstName} {message.From.LastName} ",
-            //                                       parseMode: Telegram.Bot.Types.Enums.ParseMode.Html, null, disableWebPagePreview: true, cancellationToken: cancellationToken);
-
-            //        await Task.Delay(2000, cancellationToken);
-            //        await botClient.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            //    }, cancellationToken).ConfigureAwait(false);
-            //    return;
-            //}
+            
             
             #endregion Auto answer
 
@@ -535,7 +506,7 @@ namespace TelBotApplication.Clients
             try
             {
                 await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , приветствуем вас в ламповой и дружной флудилке! Здесь любят фудпорн, "
-                               + $" троллить Джобса, сербскую еду, подгонять Данзана, а также йожек. Правила чата необходимо неукоснительно соблюдать!"
+                               + $" троллить Джобса, сербскую еду, подгонять Данзана, а также йожек!"
                                  , showAlert: true, url: null, cacheTime: 600, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId, messId, cancellationToken);
             }

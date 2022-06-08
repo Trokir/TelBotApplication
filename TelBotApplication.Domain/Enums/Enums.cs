@@ -16,6 +16,9 @@
     {
         Added,
         Edited,
-        Deleted
+        Document,
+        Video,
+        Sticker,
+        Photo
     }
 }

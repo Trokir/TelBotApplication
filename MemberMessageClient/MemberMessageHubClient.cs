@@ -28,38 +28,46 @@ namespace MemberMessageClient
 
             _connection.On<string>(Strings.Events.MessageSent, SendLog);
             _connection.On<string>(Strings.Events.MessageEdited, EditLog);
+            _connection.On<string>(Strings.Events.PhotoSent, SendPhotoLog);
+            _connection.On<string>(Strings.Events.DocumentSent, SendDocumentlLog);
+            _connection.On<string>(Strings.Events.StickerSent, SendStickerLog);
+            _connection.On<string>(Strings.Events.VideoSent, SendVideoLog);
         }
 
+        public async Task SendVideoLog(string message)
+        {
+            await WriteLog(message, TypeOfMessageLog.Video);
+        }
+        public async Task SendStickerLog(string message)
+        {
+            await WriteLog(message,TypeOfMessageLog.Sticker);
+        }
+
+        public async Task SendPhotoLog(string message)
+        {
+            await WriteLog(message,TypeOfMessageLog.Photo);
+        }
         public async Task EditLog(string message)
+        {
+            await WriteLog(message,TypeOfMessageLog.Edited);
+        }
+
+        public async Task SendLog(string message)
+        {
+            await WriteLog(message,TypeOfMessageLog.Added);
+        }
+
+        public async Task SendDocumentlLog(string message)
+        {
+            await WriteLog(message, TypeOfMessageLog.Document);
+        }
+
+        private async Task WriteLog(string message, TypeOfMessageLog typeOfMessage)
         {
             var arr = message.Split(':');
             if (arr is string[] array)
             {
                 if (array.Any() && array[4] != null && array[4].Length > 20)
-                {
-                   var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
-                    await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
-                    {
-                        GroupId = group.Id,
-                        FullName = array[2],
-                        UserName = array[3] ?? "no userName",
-                        Message = array[4],
-                        TypeOfMessageLog = TypeOfMessageLog.Edited,
-                        ChatId = long.Parse(array[0]),
-                        Group = group
-                    });
-                }
-
-            }
-        }
-
-            public async Task SendLog(string message)
-        {
-           
-            var arr = message.Split(':');
-            if (arr is string[] array)
-            {
-                if (array.Any() && array[4]!=null && array[4].Length>20)
                 {
                     var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
                     if (group == null)
@@ -71,16 +79,19 @@ namespace MemberMessageClient
                     {
                         GroupId = group.Id,
                         FullName = array[2],
-                        UserName = array[3]??"no userName",
+                        UserName = array[3] ?? "no userName",
                         Message = array[4],
-                        TypeOfMessageLog = TypeOfMessageLog.Added,
+                        TypeOfMessageLog = typeOfMessage,
                         ChatId = long.Parse(array[0]),
-                        Group =group
-                    }); 
+                        Group = group
+                    });
                 }
 
             }
         }
+
+
+
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             // Loop is here to wait until the server is running
@@ -104,5 +115,7 @@ namespace MemberMessageClient
         {
             await _connection.DisposeAsync();
         }
+
+
     }
 }
