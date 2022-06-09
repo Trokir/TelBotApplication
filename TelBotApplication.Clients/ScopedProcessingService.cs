@@ -65,7 +65,7 @@ namespace TelBotApplication.Clients
             _fruitsArr = new string[] { "🍎", "🍌", "🍒", "🍍", "🍋", "🍉" };
             _unitOfWork = unitOfWork;
             _memberHub = memberHub;
-            _counterKessages= new List<UserRepeater>();
+            _counterKessages = new List<UserRepeater>();
 
 
         }
@@ -75,7 +75,7 @@ namespace TelBotApplication.Clients
             var arr = message.Split(':');
             await _bot.SendTextMessageAsync(chatId: arr[0], $"@ You {arr[5]}", replyToMessageId: int.Parse(arr[2]), disableWebPagePreview: true);
 
-           // await _memberHub.Clients.All.SayHello($"{message.Chat.Id}:{message.MessageId}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
+            // await _memberHub.Clients.All.SayHello($"{message.Chat.Id}:{message.MessageId}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
         }
         public async Task StartChatPolling(CancellationToken stoppingToken)
         {
@@ -84,8 +84,8 @@ namespace TelBotApplication.Clients
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
 
-             await Task.WhenAll(pollingTask, dbUpdaterTask);
-           
+            await Task.WhenAll(pollingTask, dbUpdaterTask);
+
         }
 
 
@@ -206,7 +206,7 @@ namespace TelBotApplication.Clients
             if (update.Type == UpdateType.Message)
             {
                 _admins = await botClient.GetChatAdministratorsAsync(update.Message.Chat);
-                if (text != null && _botCommands!=null && _botCommands.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
+                if (text != null && _botCommands != null && _botCommands.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
 
                     BotCommandDto command = _botCommands.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
@@ -225,28 +225,36 @@ namespace TelBotApplication.Clients
 
                 }
 
-                if (text != null && _venueRequests!=null && _venueRequests.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
+                if (text != null && _venueRequests != null && _venueRequests.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
                     VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
                     await botClient.SendVenueWithDelayAsync(true, new TimeSpan(0, 0, 30), message, location, message.Chat, cancellationToken: cancellationToken);
 
                     return;
                 }
-              
+
 
                 if (chat_message.GetCurrentMessageText().Contains("/gay", StringComparison.OrdinalIgnoreCase))
                 {
                     var number = _rnd.Next(1, 100);
                     var linl = string.Empty;
-                    if (number >= 50)
+                    if (user.UserName.Equals("JobsStives"))
                     {
-                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - гей <b>высокая</b> -  {number}%";
+                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - <b>АБСОЛЮТНО НЕ ГЕЙ - 100%</b>";
                     }
                     else
                     {
-                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} -  гей <b>низкая</b> -   {number}%";
+                        if (number >= 50)
+                        {
+                            linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - гей <b>высокая</b> -  {number}%";
+                        }
+                        else
+                        {
+                            linl = $"Вероятность того , что вы, уважаемый, {user.UserName} -  гей <b>низкая</b> -   {number}%";
+                        }
                     }
-                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, linl, new TimeSpan(0, 0, 30), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
+
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, linl, new TimeSpan(0, 0, 15), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
                        allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                     return;
                 }
@@ -289,23 +297,23 @@ namespace TelBotApplication.Clients
 
             if (update.Type == UpdateType.EditedMessage)
             {
-                await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username??"no userName"}:{text}");
+                await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username ?? "no userName"}:{text}");
                 return;
             }
-          
+
             if (message?.Type != null && message.Type == MessageType.Photo)
             {
-                await _memberHub.Clients.All.SendPhotoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Photo"}");
+                await _memberHub.Clients.All.SendPhotoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Photo"}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Video)
             {
-                await _memberHub.Clients.All.SendVideoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Video"}");
+                await _memberHub.Clients.All.SendVideoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Video"}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Document)
             {
-                await _memberHub.Clients.All.SendDocumentlLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text??"Gif"}");
+                await _memberHub.Clients.All.SendDocumentlLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Gif"}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Sticker)
@@ -320,7 +328,7 @@ namespace TelBotApplication.Clients
                 if (_counterKessages.Count == 0 && message.ReplyToMessage?.MessageId != null)
                 {
                     _counterKessages.Add(new UserRepeater { UserId = user.UserId, ReplyToMessageId = message.ReplyToMessage?.MessageId ?? 1 });
-                    
+
                 }
 
                 else if (_counterKessages.Count == 1 && message.ReplyToMessage?.MessageId != null && _counterKessages.Any(x => x.UserId == user.UserId && x.ReplyToMessageId == message.ReplyToMessage?.MessageId))
@@ -334,7 +342,7 @@ namespace TelBotApplication.Clients
                 else if (_counterKessages.Count == 1 && !_counterKessages.Any(x => x.UserId == user.UserId))
                 {
                     _counterKessages.Clear();
-                   
+
                 }
                 if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
                 {
@@ -350,7 +358,7 @@ namespace TelBotApplication.Clients
                         allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                     return;
                 }
-                else if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase)  && !_admins.Any(x => x.User.Id == message.From.Id)))
+                else if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && !_admins.Any(x => x.User.Id == message.From.Id)))
                 {
                     await botClient.DeleteMessageAsync(message.Chat, message.MessageId, cancellationToken);
                     return;
@@ -384,15 +392,15 @@ namespace TelBotApplication.Clients
                         return;
                     }
 
-                   
+
 
                 }
 
                 return;
             }
             #region Auto answers
-            
-            
+
+
             #endregion Auto answer
 
 
@@ -510,10 +518,10 @@ namespace TelBotApplication.Clients
                                  , showAlert: true, url: null, cacheTime: 600, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId, messId, cancellationToken);
             }
-            catch 
+            catch
             {
             }
-           
+
         }
 
 
