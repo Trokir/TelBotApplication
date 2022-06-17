@@ -8,8 +8,7 @@ namespace TelBotApplication.DAL.Services
 {
     public class TextFilter : ITextFilter
     {
-        private readonly HashSet<string> IfIntrestedWas = new HashSet<string>
-(StringComparer.OrdinalIgnoreCase)
+        private readonly HashSet<string> IfIntrestedWas = new(StringComparer.OrdinalIgnoreCase)
         {
             "что-нибудь",
             "сообщений",
@@ -28,8 +27,7 @@ namespace TelBotApplication.DAL.Services
             "расскажите",
             "кратко",
             "пж",
-            "плиз"
-
+            "плиз",
         };
         public bool IsAlertFrase(string text)
         {

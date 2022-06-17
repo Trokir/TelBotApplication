@@ -56,17 +56,17 @@ namespace TelBotApplication.DAL.Services
 
         public async Task<IEnumerable<MessageLogger>> GetAllAsync(Expression<Func<MessageLogger, bool>> predicate)
         {
-            return await _dbContext.MessageLoggers.Where(predicate).ToListAsync();
+            return await _dbContext.MessageLoggers.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
         public async Task<MessageLogger> FindIdAsync(Expression<Func<MessageLogger, bool>> predicate)
         {
-            return await _dbContext.MessageLoggers.Where(predicate).FirstOrDefaultAsync();
+            return await _dbContext.MessageLoggers.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }
         public async Task DeleteRangeAsync(Expression<Func<MessageLogger, bool>> predicate)
         {
-            var list = await _dbContext.MessageLoggers.Where(predicate).ToListAsync();
+            var list = await _dbContext.MessageLoggers.Where(predicate).ToListAsync().ConfigureAwait(false);
             _dbContext.MessageLoggers.RemoveRange(list);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
 

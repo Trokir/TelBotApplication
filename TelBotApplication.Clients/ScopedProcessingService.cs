@@ -46,15 +46,16 @@ namespace TelBotApplication.Clients
         private CancellationTokenSource cts;
         private CancellationTokenSource _ctsHello;
         private List<UserRepeater> _counterKessages;
-
-
+        private readonly IMemberExecutor _newmembersService;
+        private List<long> _adminsIds;
         public ScopedProcessingService(IServiceProvider serviceProvider,
         IOptions<EnvironmentBotConfiguration> options,
         ILogger<BotClientService> logger,
         IMapper mapper,
         ITextFilter textFilter,
         IUnitOfWork unitOfWork,
-        IHubContext<MemberHub, INewMember> memberHub)
+        IHubContext<MemberHub, INewMember> memberHub,
+        IMemberExecutor newmembersService)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
@@ -66,9 +67,41 @@ namespace TelBotApplication.Clients
             _unitOfWork = unitOfWork;
             _memberHub = memberHub;
             _counterKessages = new List<UserRepeater>();
-
+            _newmembersService = newmembersService;
+            _newmembersService.AlertEvent += _newmembersService_AlertEvent;
+            _newmembersService.RestrictEvent += _newmembersService_RestrictEvent;
+            _newmembersService.RunAlertPolling();
 
         }
+       
+      
+
+        private async Task _newmembersService_RestrictEvent(Message message, CancellationToken cancellationToken = default) 
+        {
+          
+            try
+            {
+                await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId);
+            }
+            catch { }
+
+            await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId,
+                new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5));
+            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а)" +
+                $" кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
+                $@"https://t.me/winnersDV2022flood/3");
+            await Task.Delay(5000);
+            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId);
+            _newmembersService.ClearMembersList();
+        }
+        private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default) 
+        {
+            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
+                                             $" пожалуйста выполни проверку на антиспам https://t.me/{message.Chat.Username}/{_incomingUser.MessageId}", disableWebPagePreview: true);
+            await Task.Delay(10000);
+            await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId);
+        }
+
         public async Task GetCallBackFromNewMemeber(string message)
         {
             _logger.LogInformation("{CurrentCallBack}", message);
@@ -85,32 +118,6 @@ namespace TelBotApplication.Clients
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
 
             await Task.WhenAll(pollingTask, dbUpdaterTask);
-
-        }
-
-
-        private void _memberExecutor_RestrictEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            Task.Factory.StartNew(async () =>
-            {
-                await _bot.DeleteMessageAsync(message.Chat.Id, message.MessageId, cancellationToken);
-                await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId, new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5), cancellationToken);
-                Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а) кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
-                    $@"https://t.me/winnersDV2022flood/3", cancellationToken: cancellationToken);
-                await Task.Delay(5000, cancellationToken);
-                await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            });
-
-        }
-        private void _memberExecutor_AlertEvent(Message message, CancellationToken cancellationToken = default)
-        {
-            Task.Factory.StartNew(async () =>
-            {
-                Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
-                                          $" пожалуйста выполни проверку на антиспам https://t.me/{message.Chat.Username}/{_incomingUser.MessageId}", disableWebPagePreview: true, cancellationToken: cancellationToken);
-                await Task.Delay(10000, cancellationToken);
-                await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId, cancellationToken);
-            });
 
         }
 
@@ -187,25 +194,26 @@ namespace TelBotApplication.Clients
 
         public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-
             if (_ctsHello == null)
             {
                 _ctsHello = new CancellationTokenSource();
             }
-
-
-            CancellationToken token = _ctsHello.Token;
+            
             ChatMessage chat_message = new ChatMessage(update);
             ChatUser user = chat_message.GetCurrentUser();
             Message message = chat_message.GetCurrentMessage();
             long userId = user.UserId;
             string text = chat_message.GetCurrentMessageText();
+          
+         
             // Некоторые действия
             _logger.LogDebug(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 
             if (update.Type == UpdateType.Message)
             {
                 _admins = await botClient.GetChatAdministratorsAsync(update.Message.Chat);
+                 _adminsIds = _admins.Select(u => u.User.Id).ToList();
+                _adminsIds.Add(1087968824);
                 if (text != null && _botCommands != null && _botCommands.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
 
@@ -234,30 +242,7 @@ namespace TelBotApplication.Clients
                 }
 
 
-                if (chat_message.GetCurrentMessageText().Contains("/gay", StringComparison.OrdinalIgnoreCase))
-                {
-                    var number = _rnd.Next(1, 100);
-                    var linl = string.Empty;
-                    if (user.UserName.Equals("JobsStives"))
-                    {
-                        linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - <b>АБСОЛЮТНО НЕ ГЕЙ - 100%</b>";
-                    }
-                    else
-                    {
-                        if (number >= 50)
-                        {
-                            linl = $"Вероятность того , что вы, уважаемый, {user.UserName} - гей <b>высокая</b> -  {number}%";
-                        }
-                        else
-                        {
-                            linl = $"Вероятность того , что вы, уважаемый, {user.UserName} -  гей <b>низкая</b> -   {number}%";
-                        }
-                    }
 
-                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, linl, new TimeSpan(0, 0, 15), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
-                       allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-                    return;
-                }
 
                 if (chat_message.GetCurrentMessageText().Contains("/stat", StringComparison.OrdinalIgnoreCase))
                 {
@@ -279,12 +264,14 @@ namespace TelBotApplication.Clients
                     SendInlineAdmins(botClient: botClient, selectedAdmins, message.Chat, message, chatId: message.Chat.Id, cancellationToken: cancellationToken);
                     return;
                 }
+               
                 if (message?.Type != null && message.Type == MessageType.ChatMembersAdded)
                 {
                     int index = _rnd.Next(_fruitsArr.Length);
                     _fruit = _fruitsArr[index];
                     _callBackUser = new CallBackUser { UserId = user.UserId };
                     Message messageHello = await SendInAntiSpamline(botClient: botClient, message: message, user, _fruit, update, cancellationToken: cancellationToken);
+                    _newmembersService.AddNewMember(messageHello, DateTime.Now);
                     return;
                 }
                 if (message?.Type != null && message.Type == MessageType.ChatMemberLeft)
@@ -325,25 +312,25 @@ namespace TelBotApplication.Clients
             if (message?.Type != null && message.Type == MessageType.Text)
             {
                 await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
-                if (_counterKessages.Count == 0 && message.ReplyToMessage?.MessageId != null)
-                {
-                    _counterKessages.Add(new UserRepeater { UserId = user.UserId, ReplyToMessageId = message.ReplyToMessage?.MessageId ?? 1 });
+                //if (_counterKessages.Count == 0 && message.ReplyToMessage?.MessageId != null)
+                //{
+                //    _counterKessages.Add(new UserRepeater { UserId = user.UserId, ReplyToMessageId = message.ReplyToMessage?.MessageId ?? 1 });
 
-                }
+                //}
 
-                else if (_counterKessages.Count == 1 && message.ReplyToMessage?.MessageId != null && _counterKessages.Any(x => x.UserId == user.UserId && x.ReplyToMessageId == message.ReplyToMessage?.MessageId))
-                {
-                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, @$"<b>{user.FullName}</b>, это нарушение: несколько сообщений подряд в
-                        чат запрещено отправлять пунктом 2.2 правил.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10), parseMode: ParseMode.Html, replyToMessageId: message.MessageId,
-                   allowSendingWithoutReply: false, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
-                    _counterKessages.Clear();
-                    return;
-                }
-                else if (_counterKessages.Count == 1 && !_counterKessages.Any(x => x.UserId == user.UserId))
-                {
-                    _counterKessages.Clear();
+                //else if (_counterKessages.Count == 1 && message.ReplyToMessage?.MessageId != null && _counterKessages.Any(x => x.UserId == user.UserId && x.ReplyToMessageId == message.ReplyToMessage?.MessageId))
+                //{
+                //    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, @$"<b>{user.FullName}</b>, это нарушение: несколько сообщений подряд в
+                //        чат запрещено отправлять пунктом 2.2 правил.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10), parseMode: ParseMode.Html, replyToMessageId: message.MessageId,
+                //   allowSendingWithoutReply: false, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+                //    _counterKessages.Clear();
+                //    return;
+                //}
+                //else if (_counterKessages.Count == 1 && !_counterKessages.Any(x => x.UserId == user.UserId))
+                //{
+                //    _counterKessages.Clear();
 
-                }
+                //}
                 if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.FullName}</b>, это нарушение п. 13 правил." +
@@ -351,14 +338,14 @@ namespace TelBotApplication.Clients
                  disableWebPagePreview: true, cancellationToken: cancellationToken);
                     return;
                 }
-                if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && /*message.From.Id == 1087968824 || */_admins.Any(x => x.User.Id == message.From.Id)))
+                if (_adminsIds!=null && text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && _adminsIds.Contains(message.From.Id))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
                        $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 30), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
                         allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
                     return;
                 }
-                else if ((text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && !_admins.Any(x => x.User.Id == message.From.Id)))
+                else if (_adminsIds != null && text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && !_adminsIds.Contains(message.From.Id))
                 {
                     await botClient.DeleteMessageAsync(message.Chat, message.MessageId, cancellationToken);
                     return;
@@ -412,17 +399,23 @@ namespace TelBotApplication.Clients
                 string telegramMessage = codeOfButton;
                 if (_fruitsArr.Contains(codeOfButton, StringComparer.Ordinal) && _callBackUser != null && _callBackUser.UserId == update.CallbackQuery.From.Id)
                 {
-
+                    _newmembersService.DropNewMember(update.CallbackQuery.From.Id);
                     if (codeOfButton.Equals(_fruit))
                     {
+                       
                         await SuccessfullNewMemberAddedAsync(botClient, update, chatId, messId, cancellationToken);
                     }
                     else
                     {
                         await UnsuccessfullNewMemberAddedWithRestrictAsync(botClient, update, chatId, messId, cancellationToken);
                     }
-                    _callBackUser = null;
+                   
                     return;
+                }
+                else if (_fruitsArr.Contains(codeOfButton, StringComparer.Ordinal) && _callBackUser != null && _callBackUser.UserId != update.CallbackQuery.From.Id)
+                {
+                    await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , - не трогай чужие фрукты!"
+                                , showAlert: true, url: null, null, cancellationToken: cancellationToken);
                 }
                 else if (!_fruitsArr.Contains(codeOfButton, StringComparer.OrdinalIgnoreCase))
                 {
@@ -432,6 +425,10 @@ namespace TelBotApplication.Clients
                 }
             }
         }
+      
+       
+
+      
 
 
         #region Inline buttons
@@ -515,7 +512,7 @@ namespace TelBotApplication.Clients
             {
                 await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , приветствуем вас в ламповой и дружной флудилке! Здесь любят фудпорн, "
                                + $" троллить Джобса, сербскую еду, подгонять Данзана, а также йожек!"
-                                 , showAlert: true, url: null, cacheTime: 600, cancellationToken: cancellationToken);
+                                 , showAlert: true, url: null,null, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId, messId, cancellationToken);
             }
             catch

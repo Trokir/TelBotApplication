@@ -67,7 +67,7 @@ namespace MemberMessageClient
             var arr = message.Split(':');
             if (arr is string[] array)
             {
-                if (array.Any() && array[4] != null && array[4].Length > 20)
+                if (array.Any() && array[4] != null && array[4].Length > 10)
                 {
                     var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
                     if (group == null)
@@ -83,8 +83,10 @@ namespace MemberMessageClient
                         Message = array[4],
                         TypeOfMessageLog = typeOfMessage,
                         ChatId = long.Parse(array[0]),
+                        AddedDate = DateTime.Now,
                         Group = group
                     });
+                   
                 }
 
             }

@@ -56,17 +56,17 @@ namespace TelBotApplication.DAL.Services
 
         public async Task<IEnumerable<VenueCommand>> GetAllAsync(Expression<Func<VenueCommand, bool>> predicate)
         {
-            return await _dbContext.VenueCommands.Where(predicate).ToListAsync();
+            return await _dbContext.VenueCommands.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
         public async Task<VenueCommand> FindIdAsync(Expression<Func<VenueCommand, bool>> predicate)
         {
-            return await _dbContext.VenueCommands.Where(predicate).FirstOrDefaultAsync();
+            return await _dbContext.VenueCommands.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }
         public async Task DeleteRangeAsync(Expression<Func<VenueCommand, bool>> predicate)
         {
-            var list = await _dbContext.VenueCommands.Where(predicate).ToListAsync();
+            var list = await _dbContext.VenueCommands.Where(predicate).ToListAsync().ConfigureAwait(false);
             _dbContext.VenueCommands.RemoveRange(list);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

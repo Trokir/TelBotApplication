@@ -56,17 +56,17 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task<IEnumerable<Group>> GetAllAsync(Expression<Func<Group, bool>> predicate)
         {
-            return await _dbContext.Groups.Where(predicate).ToListAsync();
+            return await _dbContext.Groups.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
         public async Task<Group> FindIdAsync(Expression<Func<Group, bool>> predicate)
         {
-            return await _dbContext.Groups.Where(predicate).FirstOrDefaultAsync();
+            return await _dbContext.Groups.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }
         public async Task DeleteRangeAsync(Expression<Func<Group, bool>> predicate)
         {
-            var list = await _dbContext.Groups.Where(predicate).ToListAsync();
+            var list = await _dbContext.Groups.Where(predicate).ToListAsync().ConfigureAwait(false);
             _dbContext.Groups.RemoveRange(list);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
        
     }
