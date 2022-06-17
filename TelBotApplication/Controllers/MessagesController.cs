@@ -25,23 +25,34 @@ namespace TelBotApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
+        public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync()
+        {
+
+            var list = await _commandService.MessageLoggerService.GetAllAsync();
+            return Ok(list);
+        }
+        /// <summary>
+        /// Список сообщений
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("getallbyDate")]
         public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync(DateTime dateTime)
         {
 
-            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x=>x.AddedDate.Date == dateTime.Date);
+            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date);
             return Ok(list);
         }
         [HttpGet("getallbyuser")]
-        public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync(DateTime dateTime,string userName)
+        public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync(DateTime dateTime, string userName)
         {
-            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date&& x.UserName.Equals(userName,StringComparison.InvariantCultureIgnoreCase));
+            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date && x.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
             return Ok(list);
         }
 
         [HttpGet("deletebydate")]
         public async Task<ActionResult<IEnumerable<MessageLogger>>> DeleteAllMessagesAsync(DateTime dateTime)
         {
-             await _commandService.MessageLoggerService.DeleteRangeAsync(x => x.AddedDate.Date == dateTime.Date);
+            await _commandService.MessageLoggerService.DeleteRangeAsync(x => x.AddedDate.Date == dateTime.Date);
             return Ok();
         }
     }

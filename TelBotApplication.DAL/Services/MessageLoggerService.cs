@@ -21,8 +21,8 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task AddAsync(MessageLogger entity)
         {
-            _ = await _dbContext.MessageLoggers.AddAsync(entity).ConfigureAwait(false);
-            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _dbContext.MessageLoggers.AddAsync(entity);
+            _ = await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(MessageLogger entity)
