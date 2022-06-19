@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,50 +21,68 @@ namespace TelBotApplication.Controllers
             _mapper = mapper;
         }
         /// <summary>
-        /// Список команд бота
+        /// Список локаций
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
-        public async Task<ActionResult<IEnumerable<VenueCommand>>> GetAllCommandsAsync()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<VenueCommand>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<VenueCommand>>> GetAllVenuesAsync()
         {
             IEnumerable<VenueCommand> list = await _commandService.VenueCommandServise.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
-        /// Добавление команды для бота
+        /// Добавление локации
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
-        public async Task<ActionResult<VenueCommand>> AddnewCommandAsync(VenueRequest botCallerRequest)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueCommand))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<VenueCommand>> AddNewVenueAsync(VenueRequest botCallerRequest)
         {
             VenueCommand command = _mapper.Map<VenueCommand>(botCallerRequest);
             await _commandService.VenueCommandServise.AddAsync(command);
             return Ok();
         }
         /// <summary>
-        /// Обновление команды бота
+        /// Обновление локации бота
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
-        public async Task<ActionResult> UpdateCommandAsync(VenueRequestUpdate botCallerRequest)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueCommand))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateVenueAsync(VenueRequestUpdate botCallerRequest)
         {
             VenueCommand command = _mapper.Map<VenueCommand>(botCallerRequest);
             await _commandService.VenueCommandServise.UpdateAsync(command);
             return Ok();
         }
-
+        /// <summary>
+        /// Обновление локаций бота
+        /// </summary>
+        /// <param name="botCallerRequestsList"></param>
+        /// <returns></returns>
         [HttpPut("updatelist")]
-        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<VenueRequestUpdate> botCallerRequestsList)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueCommand))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateVenuesListAsync(IEnumerable<VenueRequestUpdate> botCallerRequestsList)
         {
             IEnumerable<VenueCommand> commandsList = _mapper.Map<IEnumerable<VenueCommand>>(botCallerRequestsList);
             await _commandService.VenueCommandServise.UpdateListAsync(commandsList);
             return Ok();
         }
-
+        /// <summary>
+        /// Удаление локации
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("deletebyid")]
-        public async Task<ActionResult> DeleteCommandByIdAsync(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VenueCommand))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> DeleteVenueByIdAsync(int id)
         {
             VenueCommand entity = await _commandService.VenueCommandServise.GetByIdAsync(id);
             await _commandService.VenueCommandServise.DeleteAsync(entity);

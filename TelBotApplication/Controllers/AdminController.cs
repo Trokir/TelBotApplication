@@ -21,58 +21,68 @@ namespace TelBotApplication.Controllers
             _mapper = mapper;
         }
         /// <summary>
-        /// Список команд бота
+        /// Список адимнистраторов
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
         [ProducesResponseType(StatusCodes.Status200OK,Type = typeof(IEnumerable<Admin>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<Admin>>> GetAllCommandsAsync()
+        public async Task<ActionResult<IEnumerable<Admin>>> GetAllAdminsAsync()
         {
             IEnumerable<Admin> list = await _commandService.AdminService.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
-        /// Добавление команды для бота
+        /// Добавление нового админа
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Admin))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> AddnewCommandAsync(AdminDTO botCallerRequest)
+        public async Task<ActionResult> AddNewAdminAsync(AdminDTO botCallerRequest)
         {
             var command = _mapper.Map<Admin>(botCallerRequest);
            await _commandService.AdminService.AddAsync(command);
             return Ok();
         }
         /// <summary>
-        /// Обновление команды бота
+        /// Обновление адимнистратора
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateCommandAsync(AdminRequestForUpdate botCallerRequest)
+        public async Task<ActionResult> UpdateAdminAsync(AdminRequestForUpdate botCallerRequest)
         {
             var command = _mapper.Map<Admin>(botCallerRequest);
             await _commandService.AdminService.UpdateAsync(command);
             return Ok();
         }
-
+        /// <summary>
+        /// Обновление списка админов
+        /// </summary>
+        /// <param name="botCallerRequestsList"></param>
+        /// <returns></returns>
         [HttpPut("updatelist")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<AdminRequestForUpdate> botCallerRequestsList)
+        public async Task<ActionResult> UpdateAdminsListAsync(IEnumerable<AdminRequestForUpdate> botCallerRequestsList)
         {
             IEnumerable<Admin> commandsList = _mapper.Map<IEnumerable<Admin>>(botCallerRequestsList);
             await _commandService.AdminService.UpdateListAsync(commandsList);
             return Ok();
         }
-
+        /// <summary>
+        /// Удаление админа
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("deletebyid")]
-        public async Task<ActionResult> DeleteCommandByIdAsync(int id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> DeleteAdminByIdAsync(int id)
         {
             var entity = await _commandService.AdminService.GetByIdAsync(id);
             await _commandService.AdminService.DeleteAsync(entity);

@@ -69,7 +69,7 @@ namespace TelBotApplication.Domain.Chats
                         }
                     }
                 }
-            });
+            }).ConfigureAwait(false);
         }
 
 

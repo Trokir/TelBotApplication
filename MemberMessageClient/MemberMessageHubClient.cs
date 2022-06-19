@@ -40,21 +40,21 @@ namespace MemberMessageClient
         }
         public async Task SendStickerLog(string message)
         {
-            await WriteLog(message,TypeOfMessageLog.Sticker);
+            await WriteLog(message, TypeOfMessageLog.Sticker);
         }
 
         public async Task SendPhotoLog(string message)
         {
-            await WriteLog(message,TypeOfMessageLog.Photo);
+            await WriteLog(message, TypeOfMessageLog.Photo);
         }
         public async Task EditLog(string message)
         {
-            await WriteLog(message,TypeOfMessageLog.Edited);
+            await WriteLog(message, TypeOfMessageLog.Edited);
         }
 
         public async Task SendLog(string message)
         {
-            await WriteLog(message,TypeOfMessageLog.Added);
+            await WriteLog(message, TypeOfMessageLog.Added);
         }
 
         public async Task SendDocumentlLog(string message)
@@ -69,12 +69,12 @@ namespace MemberMessageClient
             {
                 if (array.Any() && array[4] != null && array[4].Length > 10)
                 {
-                    var group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
+                    var group = await _dbContext.GroupService.FindAsync(x => x.ChatId == long.Parse(array[0]));
                     if (group == null)
                     {
                         await _dbContext.GroupService.AddAsync(new Group { ChatId = long.Parse(array[0]) });
                     }
-                    group = await _dbContext.GroupService.FindIdAsync(x => x.ChatId == long.Parse(array[0]));
+                    group = await _dbContext.GroupService.FindAsync(x => x.ChatId == long.Parse(array[0]));
                     await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
                     {
                         GroupId = group.Id,
@@ -86,9 +86,7 @@ namespace MemberMessageClient
                         AddedDate = DateTime.Now,
                         Group = group
                     });
-                   
                 }
-
             }
         }
 

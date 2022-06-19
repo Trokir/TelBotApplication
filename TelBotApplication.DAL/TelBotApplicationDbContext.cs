@@ -3,6 +3,7 @@ using TelBotApplication.Domain.Models;
 
 namespace TelBotApplication.DAL
 {
+#pragma warning disable CS1591
     public class TelBotApplicationDbContext : DbContext
     {
 
@@ -13,9 +14,9 @@ namespace TelBotApplication.DAL
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Group> Groups { get; set; }
         public DbSet<MessageLogger> MessageLoggers { get; set; }
-        public DbSet<MessageModel> MessageModels { get; set; }
+        public DbSet<TextFilter> TextFilters { get; set; }
 
-    
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 

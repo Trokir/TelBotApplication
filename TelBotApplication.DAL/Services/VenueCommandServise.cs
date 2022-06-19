@@ -58,7 +58,7 @@ namespace TelBotApplication.DAL.Services
         {
             return await _dbContext.VenueCommands.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
-        public async Task<VenueCommand> FindIdAsync(Expression<Func<VenueCommand, bool>> predicate)
+        public async Task<VenueCommand> FindAsync(Expression<Func<VenueCommand, bool>> predicate)
         {
             return await _dbContext.VenueCommands.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }

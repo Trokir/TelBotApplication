@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using TelBotApplication.Clients.BotServices;
 using TelBotApplication.Clients.Hubs;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Abstraction;
@@ -31,12 +32,12 @@ namespace TelBotApplication.Clients
         private readonly EnvironmentBotConfiguration _config;
         private readonly ILogger<BotClientService> _logger;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
         private IEnumerable<VenueRequest> _venueRequests;
         private IEnumerable<BotCommandDto> _botCommands;
         private ChatMember[] _admins;
-        private readonly ITextFilter _textFilter;
         private readonly IHubContext<MemberHub, INewMember> _memberHub;
+        private readonly IFilter _filter;
+        private readonly ICommandCondition _commandCondition;
         private ITelegramBotClient _bot { get; set; }
         private readonly string[] _fruitsArr;
         private CallBackUser _callBackUser;
@@ -52,29 +53,28 @@ namespace TelBotApplication.Clients
         IOptions<EnvironmentBotConfiguration> options,
         ILogger<BotClientService> logger,
         IMapper mapper,
-        ITextFilter textFilter,
-        IUnitOfWork unitOfWork,
         IHubContext<MemberHub, INewMember> memberHub,
-        IMemberExecutor newmembersService)
+        IMemberExecutor newmembersService,
+        IFilter filter,
+        ICommandCondition commandCondition)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
             _logger = logger;
             _mapper = mapper;
-            _textFilter = textFilter;
             _rnd = new Random();
             _fruitsArr = new string[] { "🍎", "🍌", "🍒", "🍍", "🍋", "🍉" };
-            _unitOfWork = unitOfWork;
             _memberHub = memberHub;
             _counterKessages = new List<UserRepeater>();
             _newmembersService = newmembersService;
             _newmembersService.AlertEvent += _newmembersService_AlertEvent;
             _newmembersService.RestrictEvent += _newmembersService_RestrictEvent;
             _newmembersService.RunAlertPolling();
-
+            _filter = filter;
+            _commandCondition = commandCondition;
         }
-       
-      
+
+
 
         private async Task _newmembersService_RestrictEvent(Message message, CancellationToken cancellationToken = default) 
         {
@@ -116,9 +116,9 @@ namespace TelBotApplication.Clients
             CancellationToken cancellationToken = cts.Token;
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
-
-            await Task.WhenAll(pollingTask, dbUpdaterTask);
-
+            Task filters = _filter.UpdateFilters();
+            await Task.WhenAll(pollingTask, dbUpdaterTask, filters);
+          
         }
 
         #region Start
@@ -154,8 +154,8 @@ namespace TelBotApplication.Clients
             await Task.Delay(1000);
             while (true)
             {
-                IEnumerable<VenueCommand> locations = await _unitOfWork.VenueCommandServise.GetAllAsync();
-                IEnumerable<BotCaller> list = await _unitOfWork.BotCommandService.GetAllAsync();
+                var locations = await _commandCondition.GetAllLocations();
+                var list = await _commandCondition.GetAllBotCommands();
                 _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
                 _venueRequests = _mapper.Map<IEnumerable<VenueRequest>>(locations);
                 List<BotCommand> commandsList = new List<BotCommand>();
@@ -206,7 +206,6 @@ namespace TelBotApplication.Clients
             string text = chat_message.GetCurrentMessageText();
           
          
-            // Некоторые действия
             _logger.LogDebug(Newtonsoft.Json.JsonConvert.SerializeObject(update));
 
             if (update.Type == UpdateType.Message)
@@ -331,13 +330,15 @@ namespace TelBotApplication.Clients
                 //    _counterKessages.Clear();
 
                 //}
-                if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
-                {
-                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.FullName}</b>, это нарушение п. 13 правил." +
-                $" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10),
-                 disableWebPagePreview: true, cancellationToken: cancellationToken);
-                    return;
-                }
+                //if (_textFilter.IsAlertFrase(text.Trim().ToLower(CultureInfo.InvariantCulture)))
+                //{
+                //    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $@"<b>{user.FullName}</b>, это нарушение п. 13 правил." +
+                //$" Вопросы основного чата обсуждаем только там.В следующий раз будет РО.! https://t.me/winnersDV2022flood/3", new TimeSpan(0, 0, 10),
+                // disableWebPagePreview: true, cancellationToken: cancellationToken);
+                //    return;
+                //}
+                var alert = _filter.FindAnswerForAlertFrase(text);
+                var isAlert = !string.IsNullOrEmpty(alert);
                 if (_adminsIds!=null && text.Length == 1 && text.Equals(".", StringComparison.InvariantCultureIgnoreCase) && _adminsIds.Contains(message.From.Id))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, $"Нарушение п. 13 правил." +
@@ -350,6 +351,13 @@ namespace TelBotApplication.Clients
                     await botClient.DeleteMessageAsync(message.Chat, message.MessageId, cancellationToken);
                     return;
                 }
+                else if (_adminsIds != null && isAlert /*&& _adminsIds.Contains(message.From.Id)*/)
+                {
+                    await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat,alert, new TimeSpan(0, 0, 10), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
+                         allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+
                 else
                 {
                     string trimmedText = text.Remove(text.Length - 1, 1);

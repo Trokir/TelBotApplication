@@ -19,10 +19,10 @@ var host = Host.CreateDefaultBuilder(args)
         services.AddHostedService<MemberMessageHubClient>()
         .AddTransient<IVenueCommandService, VenueCommandService>()
                 .AddTransient<IAdminService, AdminService>()
-                .AddTransient<IGroupService, GroupService>()
                  .AddTransient<IMessageLoggerService, MessageLoggerService>()
                   .AddTransient<IBotCommandService, BotCommandService>()
                 .AddTransient<IGroupService, GroupService>()
+                .AddTransient<ITextFilterService, TextFilterService>()
                 .AddTransient<IUnitOfWork, UnitOfWork>()
         .AddScoped<TelBotApplicationDbContext>();
         services.AddDbContext<TelBotApplicationDbContext>(opt =>

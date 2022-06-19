@@ -9,6 +9,7 @@ using TelBotApplication.Clients.Hubs;
 using TelBotApplication.Domain.Mapping;
 using Microsoft.Extensions.Configuration;
 using TelBotApplication.Compostions;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
@@ -49,7 +50,10 @@ void ConfigureServices(IServiceCollection services)
     _ = services.AddSwaggerGen(c =>
     {
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelBotApplication", Version = "v1" });
+        var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
+   
 }
 void ConfigureApp(WebApplication app)
 {

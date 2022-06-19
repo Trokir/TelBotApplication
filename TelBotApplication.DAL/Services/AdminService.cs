@@ -60,7 +60,7 @@ namespace TelBotApplication.DAL.Services
         {
             return await _dbContext.Admins.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
-        public async Task<Admin> FindIdAsync(Expression<Func<Admin, bool>> predicate)
+        public async Task<Admin> FindAsync(Expression<Func<Admin, bool>> predicate)
         {
             return await _dbContext.Admins.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }

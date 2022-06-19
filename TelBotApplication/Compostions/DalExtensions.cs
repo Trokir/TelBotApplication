@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TelBotApplication.DAL;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.DAL.Services;
+using TelBotApplication.Domain.Models;
 
 namespace TelBotApplication.Compostions
 {
@@ -11,14 +12,13 @@ namespace TelBotApplication.Compostions
         public static IServiceCollection AddDalDependensies(this IServiceCollection services, string connectionString)
         {
             services
-                    .AddTransient<IVenueCommandService, VenueCommandService>()
-                .AddTransient<IAdminService, AdminService>()
-                .AddTransient<IGroupService, GroupService>()
-                 .AddTransient<IMessageLoggerService, MessageLoggerService>()
-                  .AddTransient<IBotCommandService, BotCommandService>()
-                .AddTransient<IGroupService, GroupService>()
-                .AddTransient<ITextFilter, TextFilter>()
-                .AddTransient<IUnitOfWork, UnitOfWork>()
+                    .AddScoped<IVenueCommandService, VenueCommandService>()
+                .AddScoped<IAdminService, AdminService>()
+                 .AddScoped<IMessageLoggerService, MessageLoggerService>()
+                  .AddScoped<IBotCommandService, BotCommandService>()
+                .AddScoped<IGroupService, GroupService>()
+                 .AddScoped<ITextFilterService, TextFilterService>()
+                .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddScoped<TelBotApplicationDbContext>()
             .AddDbContext<TelBotApplicationDbContext>(opt =>
             opt.UseSqlite(connectionString));

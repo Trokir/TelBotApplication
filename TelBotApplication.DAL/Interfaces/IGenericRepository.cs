@@ -10,7 +10,7 @@ namespace TelBotApplication.DAL.Interfaces
         Task<T> GetByIdAsync(int id);
         Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate);
-        Task<T> FindIdAsync(Expression<Func<T, bool>> predicate);
+        Task<T> FindAsync(Expression<Func<T, bool>> predicate);
         Task AddAsync(T entity);
         Task DeleteAsync(T entity);
         Task UpdateAsync(T entity);

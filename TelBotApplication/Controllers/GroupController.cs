@@ -21,50 +21,68 @@ namespace TelBotApplication.Controllers
             _mapper = mapper;
         }
         /// <summary>
-        /// Список команд бота
+        /// Список чатов бота
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
-        public async Task<ActionResult<IEnumerable<Group>>> GetAllCommandsAsync()
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Group>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<Group>>> GetAllGroupsAsync()
         {
             IEnumerable<Group> list = await _commandService.GroupService.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
-        /// Добавление команды для бота
+        /// Добавление чата
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
-        public async Task<ActionResult<Admin>> AddnewCommandAsync(GroupDTO botCallerRequest)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<Group>> AddNewGroupAsync(GroupDTO botCallerRequest)
         {
             var command = _mapper.Map<Group>(botCallerRequest);
             await _commandService.GroupService.AddAsync(command);
             return Ok();
         }
         /// <summary>
-        /// Обновление команды бота
+        /// Обновление чата
         /// </summary>
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
-        public async Task<ActionResult> UpdateCommandAsync(GroupRequestForUpdate botCallerRequest)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateGroupAsync(GroupRequestForUpdate botCallerRequest)
         {
             var command = _mapper.Map<Group>(botCallerRequest);
             await _commandService.GroupService.UpdateAsync(command);
             return Ok();
         }
-
+        /// <summary>
+        /// Удаление чата
+        /// </summary>
+        /// <param name="botCallerRequestsList"></param>
+        /// <returns></returns>
         [HttpPut("updatelist")]
-        public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<GroupRequestForUpdate> botCallerRequestsList)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> UpdateGroupsListAsync(IEnumerable<GroupRequestForUpdate> botCallerRequestsList)
         {
             var commandsList = _mapper.Map<IEnumerable<Group>>(botCallerRequestsList);
             await _commandService.GroupService.UpdateListAsync(commandsList);
             return Ok();
         }
-
+        /// <summary>
+        /// Удаление чата
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("deletebyid")]
-        public async Task<ActionResult> DeleteCommandByIdAsync(int id)
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Group))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult> DeleteGroupByIdAsync(int id)
         {
             var entity = await _commandService.GroupService.GetByIdAsync(id);
             await _commandService.GroupService.DeleteAsync(entity);

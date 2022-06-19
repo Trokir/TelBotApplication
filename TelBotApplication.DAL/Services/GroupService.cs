@@ -58,7 +58,7 @@ namespace TelBotApplication.DAL.Services
         {
             return await _dbContext.Groups.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
-        public async Task<Group> FindIdAsync(Expression<Func<Group, bool>> predicate)
+        public async Task<Group> FindAsync(Expression<Func<Group, bool>> predicate)
         {
             return await _dbContext.Groups.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }

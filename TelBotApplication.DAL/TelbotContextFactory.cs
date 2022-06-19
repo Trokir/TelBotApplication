@@ -2,11 +2,10 @@
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using System.IO;
-using System.Reflection;
 
 namespace TelBotApplication.DAL
 {
-    internal class TelbotContextFactory : IDesignTimeDbContextFactory<TelBotApplicationDbContext>
+    public class TelbotContextFactory : IDesignTimeDbContextFactory<TelBotApplicationDbContext>
     {
 
         public TelBotApplicationDbContext CreateDbContext(string[] args)

@@ -21,8 +21,8 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task AddAsync(MessageLogger entity)
         {
-            _ = await _dbContext.MessageLoggers.AddAsync(entity);
-            _ = await _dbContext.SaveChangesAsync();
+            _ = await _dbContext.MessageLoggers.AddAsync(entity).ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task DeleteAsync(MessageLogger entity)
@@ -58,7 +58,7 @@ namespace TelBotApplication.DAL.Services
         {
             return await _dbContext.MessageLoggers.Where(predicate).ToListAsync().ConfigureAwait(false);
         }
-        public async Task<MessageLogger> FindIdAsync(Expression<Func<MessageLogger, bool>> predicate)
+        public async Task<MessageLogger> FindAsync(Expression<Func<MessageLogger, bool>> predicate)
         {
             return await _dbContext.MessageLoggers.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }

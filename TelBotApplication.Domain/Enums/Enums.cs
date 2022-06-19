@@ -12,6 +12,11 @@
         Spam = 1,
         Ham = 2
     }
+    public enum TypeOfFilter
+    {
+        Strong = 1,
+        Easy = 2
+    }
     public enum TypeOfMessageLog
     {
         Added,

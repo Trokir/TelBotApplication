@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace TelBotApplication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet("getall")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<BotCaller>))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<BotCaller>>> GetAllCommandsAsync()
         {
             IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
@@ -35,6 +38,8 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPost("add")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(BotCaller))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BotCaller>> AddnewCommandAsync(BotCallerRequest botCallerRequest)
         {
             BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
@@ -47,22 +52,36 @@ namespace TelBotApplication.Controllers
         /// <param name="botCallerRequest"></param>
         /// <returns></returns>
         [HttpPut("update")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
         {
             BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
             await _commandService.BotCommandService.UpdateAsync(command);
             return Ok();
         }
-
+        /// <summary>
+        /// Обновление списка команд
+        /// </summary>
+        /// <param name="botCallerRequestsList"></param>
+        /// <returns></returns>
         [HttpPut("updatelist")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
         {
             IEnumerable<BotCaller> commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
             await _commandService.BotCommandService.UpdateListAsync(commandsList);
             return Ok();
         }
-
+        /// <summary>
+        /// Удаление команды бота
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete("deletebyid")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteCommandByIdAsync(int id)
         {
             BotCaller entity = await _commandService.BotCommandService.GetByIdAsync(id);

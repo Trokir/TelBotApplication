@@ -27,10 +27,10 @@ namespace TelBotApplication.Domain.Mapping
             _ = CreateMap<BotCallerRequestForUpdate, BotCaller>();
             _ = CreateMap<BotCommandDto, BotCaller>();
             _ = CreateMap<BotCaller, BotCommandDto>();
-            _ = CreateMap<MessageModelDTO, MessageModel>();
-            _ = CreateMap<MessageModel, MessageModelDTO>();
-            _ = CreateMap<MessageModelDTOWithId, MessageModel>();
-            _ = CreateMap<MessageModel, MessageModelDTOWithId>();
+            _ = CreateMap<TextFilterDTO, TextFilter>();
+            _ = CreateMap<TextFilter, TextFilterDTO>();
+
+            
         }
     }
 }
