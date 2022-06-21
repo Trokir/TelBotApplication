@@ -15,6 +15,7 @@ namespace TelBotApplication.DAL.Services
         public IMessageLoggerService MessageLoggerService { get; }
         public IGroupService GroupService { get; }
         public ITextFilterService TextFilterService { get; }
+        public IAnchorService AnchorService { get; }
 
         public UnitOfWork(TelBotApplicationDbContext dbContext,
              ILogger<UnitOfWork> logger,
@@ -23,7 +24,8 @@ namespace TelBotApplication.DAL.Services
             IAdminService adminService,
             IMessageLoggerService messageLoggerService,
             IGroupService groupService,
-            ITextFilterService textFilterService)
+            ITextFilterService textFilterService,
+            IAnchorService anchorService)
         {
             _dbContext = dbContext;
             BotCommandService = botCommandService;
@@ -33,6 +35,7 @@ namespace TelBotApplication.DAL.Services
             MessageLoggerService = messageLoggerService;
             GroupService = groupService;
             TextFilterService = textFilterService;
+            AnchorService = anchorService;
         }
         public async Task<int> Complete()
         {

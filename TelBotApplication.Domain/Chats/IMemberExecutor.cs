@@ -10,9 +10,9 @@ namespace TelBotApplication.Domain.Chats
         event AlertEventHandler AlertEvent;
         event RestrictEventHandler RestrictEvent;
 
-        void AddNewMember(Message message, DateTime addDate);
-        void DropNewMember(long id);
+        void AddNewMember(CallBackUser user, Message message, DateTime addDate);
+        void DropNewMember(CallbackQuery callbackQuery);
         void ClearMembersList();
-        Task RunAlertPolling();
+        void RunAlertPolling();
     }
 }

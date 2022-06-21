@@ -18,6 +18,7 @@ namespace TelBotApplication.Compostions
                   .AddScoped<IBotCommandService, BotCommandService>()
                 .AddScoped<IGroupService, GroupService>()
                  .AddScoped<ITextFilterService, TextFilterService>()
+                 .AddTransient<IAnchorService, AnchorService>()
                 .AddScoped<IUnitOfWork, UnitOfWork>()
             .AddScoped<TelBotApplicationDbContext>()
             .AddDbContext<TelBotApplicationDbContext>(opt =>

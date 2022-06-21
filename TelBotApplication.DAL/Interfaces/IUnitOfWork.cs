@@ -11,6 +11,7 @@ namespace TelBotApplication.DAL.Interfaces
         public IMessageLoggerService MessageLoggerService { get; }
         public IGroupService GroupService { get; }
         public ITextFilterService TextFilterService { get; }
+        public IAnchorService AnchorService { get; }
         Task<int> Complete();
     }
 }

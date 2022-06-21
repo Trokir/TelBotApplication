@@ -1,8 +1,7 @@
-﻿
-
-using AutoMapper;
+﻿using AutoMapper;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models;
+using TelBotApplication.Domain.Models.Anchors;
 
 namespace TelBotApplication.Domain.Mapping
 {
@@ -29,8 +28,12 @@ namespace TelBotApplication.Domain.Mapping
             _ = CreateMap<BotCaller, BotCommandDto>();
             _ = CreateMap<TextFilterDTO, TextFilter>();
             _ = CreateMap<TextFilter, TextFilterDTO>();
+            _ = CreateMap<AnchorDTO, Anchor>();
+            _ = CreateMap<Anchor, AnchorDTO>();
 
             
+
+
         }
     }
 }

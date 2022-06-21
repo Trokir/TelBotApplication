@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Telegram.Bot;
 using Telegram.Bot.Types;
 
 namespace TelBotApplication.Domain.Chats
@@ -25,22 +22,21 @@ namespace TelBotApplication.Domain.Chats
         }
 
 
-        public void AddNewMember(Message message, DateTime addDate)
+        public void AddNewMember(CallBackUser user,Message message, DateTime addDate)
         {
-            var member = new Member { Id = message.From.Id, Message = message, AddDate = addDate };
+            var member = new Member { Id = user.UserId, Message = message, AddDate = addDate };
             if (_members.TryAdd(member.Id, member)) return;
-            
+
         }
 
-        public void DropNewMember(long id)
+        public void DropNewMember(CallbackQuery callbackQuery)
         {
-            if (_members.TryGetValue(id, out var value))
+            if (_members.TryGetValue(callbackQuery.From.Id, out var value))
             {
-                if (_members.TryRemove(id, out value))
+                if (_members.TryRemove(callbackQuery.From.Id, out value))
                 {
                     return;
                 }
-                DropNewMember(id);
             }
         }
         public void ClearMembersList()
@@ -48,28 +44,30 @@ namespace TelBotApplication.Domain.Chats
             _members.Clear();
         }
 
-        public async Task RunAlertPolling()
+        public void RunAlertPolling()
         {
-            await Task.Factory.StartNew(async () =>
+
+            while (true)
             {
-                while (true)
+                foreach (var member in _members)
                 {
-                    foreach (var member in _members)
+                    var diffInSeconds = (DateTime.Now - member.Value.AddDate).TotalSeconds;
+                    if (diffInSeconds >= 15 && diffInSeconds < 17 && !member.Value.IsAlerted && !member.Value.IsRestricted)
                     {
-                        var diffInSeconds = (DateTime.Now - member.Value.AddDate).TotalSeconds;
-                        if (diffInSeconds >= 15 && diffInSeconds < 17 && !member.Value.IsAlerted && !member.Value.IsRestricted)
-                        {
-                            await AlertEvent?.Invoke(member.Value.Message);
-                            member.Value.IsAlerted = true;
-                        }
-                        else if (diffInSeconds >= 30 && diffInSeconds < 32 && member.Value.IsAlerted && !member.Value.IsRestricted)
-                        {
-                            RestrictEvent?.Invoke(member.Value.Message);
-                            member.Value.IsRestricted = true;
-                        }
+
+                        AlertEvent?.Invoke(member.Value.Message);
+                        member.Value.IsAlerted = true;
+
+                    }
+                    else if (diffInSeconds >= 30 && diffInSeconds < 32 && member.Value.IsAlerted && !member.Value.IsRestricted)
+                    {
+                        RestrictEvent?.Invoke(member.Value.Message);
+                        member.Value.IsRestricted = true;
+
                     }
                 }
-            }).ConfigureAwait(false);
+            }
+
         }
 
 

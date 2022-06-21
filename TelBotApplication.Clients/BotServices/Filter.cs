@@ -53,31 +53,34 @@ namespace TelBotApplication.Clients.BotServices
             var normalText = NormalizeSentence(text);
             var arr = GetTokens(normalText);
 
-
-            foreach (var filter in _filters)
+            if (_filters != null)
             {
-                var filterText = filter.Text;
-                var filterFilter = filter.Filter;
-                switch (filterFilter)
+                foreach (var filter in _filters)
                 {
-                    case Domain.Enums.TypeOfFilter.Strong:
-                        foreach (var word in arr)
-                        {
-                            if (String.Compare(word, filterText, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase) == 0)
+                    var filterText = filter.Text;
+                    var filterFilter = filter.Filter;
+                    switch (filterFilter)
+                    {
+                        case Domain.Enums.TypeOfFilter.Strong:
+                            foreach (var word in arr)
+                            {
+                                if (String.Compare(word, filterText, CultureInfo.InvariantCulture, CompareOptions.IgnoreCase) == 0)
+                                {
+                                    return filter.Comment;
+                                }
+                            }
+                            break;
+                        case Domain.Enums.TypeOfFilter.Easy:
+                            var result = CalculateFuzzyEqualValue(filterText, text);
+                            if (result > ThresholdSentence)
                             {
                                 return filter.Comment;
                             }
-                        }
-                        break;
-                    case Domain.Enums.TypeOfFilter.Easy:
-                        var result = CalculateFuzzyEqualValue(filterText, text);
-                        if (result > ThresholdSentence)
-                        {
-                            return filter.Comment;
-                        }
-                        break;
+                            break;
+                    }
                 }
             }
+          
             return string.Empty;
         }
 

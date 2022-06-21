@@ -23,6 +23,7 @@ var host = Host.CreateDefaultBuilder(args)
                   .AddTransient<IBotCommandService, BotCommandService>()
                 .AddTransient<IGroupService, GroupService>()
                 .AddTransient<ITextFilterService, TextFilterService>()
+                .AddTransient<IAnchorService, AnchorService>()
                 .AddTransient<IUnitOfWork, UnitOfWork>()
         .AddScoped<TelBotApplicationDbContext>();
         services.AddDbContext<TelBotApplicationDbContext>(opt =>

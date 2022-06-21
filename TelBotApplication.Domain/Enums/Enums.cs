@@ -26,4 +26,20 @@
         Sticker,
         Photo
     }
+    public enum AnchorCallBack
+    {
+        Link,
+        Reaction,
+        Share,
+        CallTrigger,
+        None
+    }
+    public enum AnchorAction
+    {
+        DropPrevious,
+        ChangeCurrent,
+        Add,
+        None
+    }
+
 }

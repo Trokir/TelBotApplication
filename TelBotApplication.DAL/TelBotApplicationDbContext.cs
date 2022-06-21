@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TelBotApplication.Domain.Models;
+using TelBotApplication.Domain.Models.Anchors;
 
 namespace TelBotApplication.DAL
 {
@@ -15,7 +16,7 @@ namespace TelBotApplication.DAL
         public DbSet<Group> Groups { get; set; }
         public DbSet<MessageLogger> MessageLoggers { get; set; }
         public DbSet<TextFilter> TextFilters { get; set; }
-
+        public DbSet <Anchor> Anchors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -69,9 +69,13 @@ namespace TelBotApplication.Clients
             _newmembersService = newmembersService;
             _newmembersService.AlertEvent += _newmembersService_AlertEvent;
             _newmembersService.RestrictEvent += _newmembersService_RestrictEvent;
-            _newmembersService.RunAlertPolling();
+            
             _filter = filter;
             _commandCondition = commandCondition;
+            Task.Factory.StartNew(() =>
+            {
+                _newmembersService.RunAlertPolling();
+            });
         }
 
 
@@ -86,13 +90,13 @@ namespace TelBotApplication.Clients
             catch { }
 
             await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId,
-                new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(5));
+                new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddSeconds(60));
             Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а)" +
                 $" кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
                 $@"https://t.me/winnersDV2022flood/3");
             await Task.Delay(5000);
             await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId);
-            _newmembersService.ClearMembersList();
+            //_newmembersService.ClearMembersList();
         }
         private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default) 
         {
@@ -270,7 +274,7 @@ namespace TelBotApplication.Clients
                     _fruit = _fruitsArr[index];
                     _callBackUser = new CallBackUser { UserId = user.UserId };
                     Message messageHello = await SendInAntiSpamline(botClient: botClient, message: message, user, _fruit, update, cancellationToken: cancellationToken);
-                    _newmembersService.AddNewMember(messageHello, DateTime.Now);
+                    _newmembersService.AddNewMember(_callBackUser,messageHello, DateTime.Now);
                     return;
                 }
                 if (message?.Type != null && message.Type == MessageType.ChatMemberLeft)
@@ -351,7 +355,7 @@ namespace TelBotApplication.Clients
                     await botClient.DeleteMessageAsync(message.Chat, message.MessageId, cancellationToken);
                     return;
                 }
-                else if (_adminsIds != null && isAlert /*&& _adminsIds.Contains(message.From.Id)*/)
+                else if (_adminsIds != null && isAlert && !_adminsIds.Contains(message.From.Id))
                 {
                     await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat,alert, new TimeSpan(0, 0, 10), parseMode: ParseMode.Html, replyToMessageId: message.ReplyToMessage?.MessageId ?? -1,
                          allowSendingWithoutReply: true, disableWebPagePreview: true, cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -407,7 +411,7 @@ namespace TelBotApplication.Clients
                 string telegramMessage = codeOfButton;
                 if (_fruitsArr.Contains(codeOfButton, StringComparer.Ordinal) && _callBackUser != null && _callBackUser.UserId == update.CallbackQuery.From.Id)
                 {
-                    _newmembersService.DropNewMember(update.CallbackQuery.From.Id);
+                    _newmembersService.DropNewMember(update.CallbackQuery);
                     if (codeOfButton.Equals(_fruit))
                     {
                        
@@ -422,8 +426,9 @@ namespace TelBotApplication.Clients
                 }
                 else if (_fruitsArr.Contains(codeOfButton, StringComparer.Ordinal) && _callBackUser != null && _callBackUser.UserId != update.CallbackQuery.From.Id)
                 {
-                    await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , - не трогай чужие фрукты!"
+                    await botClient.AnswerCallbackQueryAsync(callbackQueryId: update.CallbackQuery.Id, text: $@"{update.CallbackQuery.From.FirstName} {update.CallbackQuery.From.LastName} , не трогай чужие фрукты!"
                                 , showAlert: true, url: null, null, cancellationToken: cancellationToken);
+                    return;
                 }
                 else if (!_fruitsArr.Contains(codeOfButton, StringComparer.OrdinalIgnoreCase))
                 {
