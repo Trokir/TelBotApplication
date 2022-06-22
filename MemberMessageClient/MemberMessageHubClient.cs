@@ -69,22 +69,16 @@ namespace MemberMessageClient
             {
                 if (array.Any() && array[4] != null && array[4].Length > 10)
                 {
-                    var group = await _dbContext.GroupService.FindAsync(x => x.ChatId == long.Parse(array[0]));
-                    if (group == null)
-                    {
-                        await _dbContext.GroupService.AddAsync(new Group { ChatId = long.Parse(array[0]) });
-                    }
-                    group = await _dbContext.GroupService.FindAsync(x => x.ChatId == long.Parse(array[0]));
+                    
                     await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
                     {
-                        GroupId = group.Id,
                         FullName = array[2],
                         UserName = array[3] ?? "no userName",
                         Message = array[4],
                         TypeOfMessageLog = typeOfMessage,
                         ChatId = long.Parse(array[0]),
                         AddedDate = DateTime.Now,
-                        Group = group
+                        ChatTitle = array[5],
                     });
                 }
             }

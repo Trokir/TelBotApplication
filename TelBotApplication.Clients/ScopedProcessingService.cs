@@ -37,6 +37,7 @@ namespace TelBotApplication.Clients
         private ChatMember[] _admins;
         private readonly IHubContext<MemberHub, INewMember> _memberHub;
         private readonly IFilter _filter;
+        private readonly IAnchorHandler _anchorHandler;
         private readonly ICommandCondition _commandCondition;
         private ITelegramBotClient _bot { get; set; }
         private readonly string[] _fruitsArr;
@@ -56,7 +57,8 @@ namespace TelBotApplication.Clients
         IHubContext<MemberHub, INewMember> memberHub,
         IMemberExecutor newmembersService,
         IFilter filter,
-        ICommandCondition commandCondition)
+        ICommandCondition commandCondition,
+        IAnchorHandler anchorHandler)
         {
             _config = options.Value;
             _bot = new TelegramBotClient(_config.Token);/*flud*/
@@ -69,13 +71,14 @@ namespace TelBotApplication.Clients
             _newmembersService = newmembersService;
             _newmembersService.AlertEvent += _newmembersService_AlertEvent;
             _newmembersService.RestrictEvent += _newmembersService_RestrictEvent;
-            
+            _anchorHandler = anchorHandler;
             _filter = filter;
             _commandCondition = commandCondition;
             Task.Factory.StartNew(() =>
             {
                 _newmembersService.RunAlertPolling();
             });
+            _anchorHandler = anchorHandler;
         }
 
 
@@ -121,7 +124,8 @@ namespace TelBotApplication.Clients
             Task pollingTask = RunBotPolling(cancellationToken);
             Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
             Task filters = _filter.UpdateFilters();
-            await Task.WhenAll(pollingTask, dbUpdaterTask, filters);
+            Task anchors = _anchorHandler.UpdateAchors();
+            await Task.WhenAll(pollingTask, dbUpdaterTask, filters, anchors);
           
         }
 
@@ -267,7 +271,12 @@ namespace TelBotApplication.Clients
                     SendInlineAdmins(botClient: botClient, selectedAdmins, message.Chat, message, chatId: message.Chat.Id, cancellationToken: cancellationToken);
                     return;
                 }
-               
+                #region Anchors
+                if (message?.Type != null && message?.Entities != null && message.Entities.Any(x=>x.Type ==MessageEntityType.Hashtag) )
+                {
+                   await _anchorHandler.ExecuteAncor(text);
+                }
+                #endregion Anchors
                 if (message?.Type != null && message.Type == MessageType.ChatMembersAdded)
                 {
                     int index = _rnd.Next(_fruitsArr.Length);
@@ -287,34 +296,34 @@ namespace TelBotApplication.Clients
 
             if (update.Type == UpdateType.EditedMessage)
             {
-                await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username ?? "no userName"}:{text}");
+                await _memberHub.Clients.All.EditLog($"{update.EditedMessage.Chat.Id}:{user.MessageId}:{update.EditedMessage.From.FirstName ?? "no firstName"} {update.EditedMessage.From.LastName ?? "no lastName"}:{update.EditedMessage.From.Username ?? "no userName"}:{text}:{message.Chat.Title}");
                 return;
             }
 
             if (message?.Type != null && message.Type == MessageType.Photo)
             {
-                await _memberHub.Clients.All.SendPhotoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Photo"}");
+                await _memberHub.Clients.All.SendPhotoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Photo"}:{message.Chat.Title}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Video)
             {
-                await _memberHub.Clients.All.SendVideoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Video"}");
+                await _memberHub.Clients.All.SendVideoLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Video"}:{message.Chat.Title}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Document)
             {
-                await _memberHub.Clients.All.SendDocumentlLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Gif"}");
+                await _memberHub.Clients.All.SendDocumentlLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{text ?? "Gif"}:{message.Chat.Title}");
                 return;
             }
             if (message?.Type != null && message.Type == MessageType.Sticker)
             {
-                await _memberHub.Clients.All.SendStickerLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{message.Sticker.FileUniqueId}");
+                await _memberHub.Clients.All.SendStickerLog($"{update.Message.Chat.Id}:{update.Message.MessageId}:{message.From.FirstName ?? "no firstName"} {message.From.LastName ?? "no lastName"}:{message.From.Username ?? "no userName"}:{message.Sticker.FileUniqueId}:{message.Chat.Title}");
                 return;
             }
 
             if (message?.Type != null && message.Type == MessageType.Text)
             {
-                await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}");
+                await _memberHub.Clients.All.SendLog($"{message.Chat.Id}:{user.MessageId}:{user.FullName}:{user.UserName}:{text}:{message.Chat.Title}");
                 //if (_counterKessages.Count == 0 && message.ReplyToMessage?.MessageId != null)
                 //{
                 //    _counterKessages.Add(new UserRepeater { UserId = user.UserId, ReplyToMessageId = message.ReplyToMessage?.MessageId ?? 1 });

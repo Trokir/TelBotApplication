@@ -11,9 +11,7 @@ namespace TelBotApplication.DAL.Services
         private readonly ILogger<UnitOfWork> _logger;
         public IBotCommandService BotCommandService { get; }
         public IVenueCommandService VenueCommandServise { get; }
-        public IAdminService AdminService { get; }
         public IMessageLoggerService MessageLoggerService { get; }
-        public IGroupService GroupService { get; }
         public ITextFilterService TextFilterService { get; }
         public IAnchorService AnchorService { get; }
 
@@ -21,9 +19,7 @@ namespace TelBotApplication.DAL.Services
              ILogger<UnitOfWork> logger,
             IBotCommandService botCommandService,
             IVenueCommandService venueCommandServise,
-            IAdminService adminService,
             IMessageLoggerService messageLoggerService,
-            IGroupService groupService,
             ITextFilterService textFilterService,
             IAnchorService anchorService)
         {
@@ -31,9 +27,7 @@ namespace TelBotApplication.DAL.Services
             BotCommandService = botCommandService;
             _logger = logger;
             VenueCommandServise = venueCommandServise;
-            AdminService = adminService;
             MessageLoggerService = messageLoggerService;
-            GroupService = groupService;
             TextFilterService = textFilterService;
             AnchorService = anchorService;
         }

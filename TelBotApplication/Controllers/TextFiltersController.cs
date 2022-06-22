@@ -104,8 +104,8 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateFiltersListAsync(IEnumerable<TextFilterDTO> filterList)
         {
-            var filters = _mapper.Map<IEnumerable<Admin>>(filterList);
-            await _commandService.AdminService.UpdateListAsync(filters);
+            var filters = _mapper.Map<IEnumerable<TextFilter>>(filterList);
+            await _commandService.TextFilterService.UpdateListAsync(filters);
             return Ok();
         }
 

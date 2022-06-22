@@ -9,16 +9,6 @@ namespace TelBotApplication.Domain.Mapping
     {
         public AutoMapperProfile()
         {
-            _ = CreateMap<Group, GroupRequestForUpdate>();
-            _ = CreateMap<GroupRequestForUpdate, Group>();
-            _ = CreateMap<GroupDTO, Group>();
-            _ = CreateMap<Group, GroupDTO>();
-
-            _ = CreateMap<Admin, AdminRequestForUpdate>();
-            _ = CreateMap<AdminRequestForUpdate, Admin>();
-            _ = CreateMap<AdminDTO, Admin>();
-            _ = CreateMap<Admin, AdminDTO>();
-
             _ = CreateMap<VenueRequest, VenueCommand>();
             _ = CreateMap<VenueCommand, VenueRequest>();
             _ = CreateMap<VenueRequestUpdate, VenueCommand>();
@@ -28,12 +18,12 @@ namespace TelBotApplication.Domain.Mapping
             _ = CreateMap<BotCaller, BotCommandDto>();
             _ = CreateMap<TextFilterDTO, TextFilter>();
             _ = CreateMap<TextFilter, TextFilterDTO>();
-            _ = CreateMap<AnchorDTO, Anchor>();
-            _ = CreateMap<Anchor, AnchorDTO>();
+            _ = CreateMap<Anchor, AnchorDTO>()
+                .ForMember(x => x.ButtonCondition, opt => opt.MapFrom(z => z.AnchorCallback.ButtonCondition))
+                .ForMember(x => x.ButtonText, opt => opt.MapFrom(z => z.AnchorCallback.ButtonText));
 
-            
-
-
+            _ = CreateMap<AnchorCallbackDTO, AnchorCallback>();
+            _ = CreateMap<AnchorCallback, AnchorCallbackDTO>();
         }
     }
 }

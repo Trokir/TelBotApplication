@@ -16,6 +16,7 @@ namespace TelBotApplication.Compostions
                 .AddTransient<IScopedProcessingService, ScopedProcessingService>() 
                 .AddSingleton<ISpamConfiguration, SpamConfiguration>()
                 .AddScoped<IFilter, Filter>()
+                 .AddScoped<IAnchorHandler, AnchorHandler>()
                  .AddScoped<ICommandCondition, CommandCondition>()
                 .AddTransient<IMemberExecutor, MemberExecutor>()
                 .AddSingleton<BotClientService>()

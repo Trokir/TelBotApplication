@@ -28,11 +28,26 @@
     }
     public enum AnchorCallBack
     {
-        Link,
-        Reaction,
-        Share,
-        CallTrigger,
-        None
+        /// <summary>
+        /// Ссылка
+        /// </summary>
+        Link =0,
+        /// <summary>
+        /// Реакция
+        /// </summary>
+        Reaction=1,
+        /// <summary>
+        /// Поделиться
+        /// </summary>
+        Share=2,
+        /// <summary>
+        /// Вызвать триггер
+        /// </summary>
+        CallTrigger=3,
+        /// <summary>
+        /// None
+        /// </summary>
+        None=4
     }
     public enum AnchorAction
     {

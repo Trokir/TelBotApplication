@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TelBotApplication.DAL;
 
@@ -10,12 +11,32 @@ using TelBotApplication.DAL;
 namespace TelBotApplication.DAL.Migrations
 {
     [DbContext(typeof(TelBotApplicationDbContext))]
-    partial class TelBotApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20220622143951_InitCallback")]
+    partial class InitCallback
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.5");
+
+            modelBuilder.Entity("TelBotApplication.Domain.Models.Admin", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
+
+                    b.ToTable("Admins");
+                });
 
             modelBuilder.Entity("TelBotApplication.Domain.Models.Anchors.Anchor", b =>
                 {
@@ -26,10 +47,13 @@ namespace TelBotApplication.DAL.Migrations
                     b.Property<int>("AnchorAction")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AnchorCallBackType")
+                    b.Property<int>("Filter")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Filter")
+                    b.Property<long>("GroupId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("GroupId1")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
@@ -44,6 +68,8 @@ namespace TelBotApplication.DAL.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId1");
 
                     b.ToTable("Anchors");
                 });
@@ -102,6 +128,20 @@ namespace TelBotApplication.DAL.Migrations
                     b.ToTable("BotCallers");
                 });
 
+            modelBuilder.Entity("TelBotApplication.Domain.Models.Group", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ChatId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Groups");
+                });
+
             modelBuilder.Entity("TelBotApplication.Domain.Models.MessageLogger", b =>
                 {
                     b.Property<int>("Id")
@@ -114,11 +154,11 @@ namespace TelBotApplication.DAL.Migrations
                     b.Property<long>("ChatId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ChatTitle")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("FullName")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("GroupId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Message")
                         .HasColumnType("TEXT");
@@ -130,6 +170,8 @@ namespace TelBotApplication.DAL.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.ToTable("MessageLoggers");
                 });
@@ -181,6 +223,26 @@ namespace TelBotApplication.DAL.Migrations
                     b.ToTable("VenueCommands");
                 });
 
+            modelBuilder.Entity("TelBotApplication.Domain.Models.Admin", b =>
+                {
+                    b.HasOne("TelBotApplication.Domain.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
+            modelBuilder.Entity("TelBotApplication.Domain.Models.Anchors.Anchor", b =>
+                {
+                    b.HasOne("TelBotApplication.Domain.Models.Group", "Group")
+                        .WithMany("Anchors")
+                        .HasForeignKey("GroupId1");
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("TelBotApplication.Domain.Models.Anchors.AnchorCallback", b =>
                 {
                     b.HasOne("TelBotApplication.Domain.Models.Anchors.Anchor", "Anchor")
@@ -192,9 +254,25 @@ namespace TelBotApplication.DAL.Migrations
                     b.Navigation("Anchor");
                 });
 
+            modelBuilder.Entity("TelBotApplication.Domain.Models.MessageLogger", b =>
+                {
+                    b.HasOne("TelBotApplication.Domain.Models.Group", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Group");
+                });
+
             modelBuilder.Entity("TelBotApplication.Domain.Models.Anchors.Anchor", b =>
                 {
                     b.Navigation("AnchorCallback");
+                });
+
+            modelBuilder.Entity("TelBotApplication.Domain.Models.Group", b =>
+                {
+                    b.Navigation("Anchors");
                 });
 #pragma warning restore 612, 618
         }
