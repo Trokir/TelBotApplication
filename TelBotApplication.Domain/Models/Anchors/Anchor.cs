@@ -15,7 +15,7 @@ namespace TelBotApplication.Domain.Models.Anchors
         public TypeOfFilter Filter { get; set; }
         public AnchorCallBack AnchorCallBackType { get; set; }
         public AnchorAction AnchorAction { get; set; }
-        public  AnchorCallback AnchorCallback { get; set; }
+        public AnchorCallback AnchorCallback { get; set; }
         public int UntilMinutes { get; set; }
 
     }

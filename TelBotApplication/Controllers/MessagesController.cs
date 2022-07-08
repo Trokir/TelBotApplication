@@ -43,7 +43,7 @@ namespace TelBotApplication.Controllers
         public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync(DateTime dateTime)
         {
 
-            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date);
+            var list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date);
             return Ok(list);
         }
 
@@ -52,7 +52,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<MessageLogger>>> GetAllMessagesAsync(DateTime dateTime, string userName)
         {
-            IEnumerable<MessageLogger> list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date && x.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
+            var list = await _commandService.MessageLoggerService.GetAllAsync(x => x.AddedDate.Date == dateTime.Date && x.UserName.Equals(userName, StringComparison.InvariantCultureIgnoreCase));
             return Ok(list);
         }
 

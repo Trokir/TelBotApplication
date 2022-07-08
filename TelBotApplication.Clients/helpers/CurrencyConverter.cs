@@ -19,16 +19,16 @@ namespace TelBotApplication.Clients.helpers
         public CurrencyConverter(IServiceProvider factory)
         {
             _factory = factory;
-            
+
         }
 
 
         public async Task<decimal> GetCurrencyFromRubles(float amount)
         {
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             _cache = scope.ServiceProvider
                      .GetService<IMemoryCache>();
-            
+
             if (GetCache("CurrencyModelRub") is CurrencyModel model)
             {
                 return Convert.ToDecimal(model.usd.rate * amount);
@@ -38,25 +38,25 @@ namespace TelBotApplication.Clients.helpers
                 var httpClient =
                    scope.ServiceProvider
                        .GetRequiredService<IHttpClientFactory>();
-                var client =  httpClient.CreateClient();
+                var client = httpClient.CreateClient();
                 var responce = await client.GetAsync(rubUrl);
                 var str = await responce.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<CurrencyModel>(str);
 
-                SetCache("CurrencyModelRub",result);
+                SetCache("CurrencyModelRub", result);
 
                 return Convert.ToDecimal(result.usd.rate * amount);
             }
         }
 
-      
+
 
         public async Task<decimal> GetCurrencyFromUSD(float amount)
         {
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             _cache = scope.ServiceProvider
                      .GetRequiredService<IMemoryCache>();
-           
+
             if (GetCache("CurrencyModelUsd") is CurrencyModel model)
             {
                 return Convert.ToDecimal(model.rub.rate * amount);
@@ -70,14 +70,14 @@ namespace TelBotApplication.Clients.helpers
                 var responce = await client.GetAsync(usdUrl);
                 var str = await responce.Content.ReadAsStringAsync();
                 var result = JsonSerializer.Deserialize<CurrencyModel>(str);
-                SetCache("CurrencyModelUsd" ,result);
+                SetCache("CurrencyModelUsd", result);
                 return Convert.ToDecimal(result.rub.rate * amount);
             }
-           
+
         }
         public async Task<decimal> GetCurrencyFromEUR(float amount)
         {
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             _cache = scope.ServiceProvider
                      .GetRequiredService<IMemoryCache>();
             if (GetCache("CurrencyModelEur") is CurrencyModel model)
@@ -89,19 +89,19 @@ namespace TelBotApplication.Clients.helpers
                 var httpClient =
                   scope.ServiceProvider
                       .GetRequiredService<IHttpClientFactory>();
-            var client = httpClient.CreateClient();
-            var responce = await client.GetAsync(euroUrl);
-            var str = await responce.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<CurrencyModel>(str);
-            SetCache("CurrencyModelEur",result);
-            return Convert.ToDecimal(result.rub.rate * amount);
+                var client = httpClient.CreateClient();
+                var responce = await client.GetAsync(euroUrl);
+                var str = await responce.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<CurrencyModel>(str);
+                SetCache("CurrencyModelEur", result);
+                return Convert.ToDecimal(result.rub.rate * amount);
             }
-            
+
         }
 
         public async Task<decimal> GetCurrencyFromReal(float amount)
         {
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             _cache = scope.ServiceProvider
                      .GetRequiredService<IMemoryCache>();
             if (GetCache("CurrencyModelReal") is CurrencyModel model)

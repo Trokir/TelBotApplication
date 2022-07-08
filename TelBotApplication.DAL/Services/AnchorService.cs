@@ -6,7 +6,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
-using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models.Anchors;
 
 namespace TelBotApplication.DAL.Services
@@ -42,7 +41,7 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task<IEnumerable<Anchor>> GetAllAsync()
         {
-            var result = await _dbContext.Anchors.Include(x=>x.AnchorCallback).ToListAsync().ConfigureAwait(false);
+            var result = await _dbContext.Anchors.Include(x => x.AnchorCallback).ToListAsync().ConfigureAwait(false);
             return result;
         }
         public async Task<IEnumerable<Anchor>> GetAllAsync(Expression<Func<Anchor, bool>> predicate)

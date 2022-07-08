@@ -11,5 +11,5 @@ namespace TelBotApplication.Clients.Hubs
         Task SendStickerLog(string message);
         Task SendVideoLog(string message);
     }
-    
+
 }

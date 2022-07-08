@@ -13,8 +13,8 @@ namespace TelBotApplication.Compostions
     {
         public static IServiceCollection AddIntegrationDependencies(this IServiceCollection services, IConfiguration configuration)
         {
-            _ = services           
-                .AddTransient<IScopedProcessingService, ScopedProcessingService>() 
+            _ = services
+                .AddTransient<IScopedProcessingService, ScopedProcessingService>()
                 .AddSingleton<ISpamConfiguration, SpamConfiguration>()
                 .AddScoped<IFilter, Filter>()
                  .AddScoped<IAnchorHandler, AnchorHandler>()

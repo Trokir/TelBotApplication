@@ -10,11 +10,11 @@ namespace TelBotApplication.Compostions
         public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
         {
 
-            EnvironmentBotConfiguration botConfig = new EnvironmentBotConfiguration();
+            var botConfig = new EnvironmentBotConfiguration();
             configuration.GetSection("BotConfig").Bind(botConfig);
             _ = services.AddSingleton(Options.Create(botConfig));
             return services.AddDalDependensies(@"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db").AddIntegrationDependencies(configuration);
-                
+
         }
     }
 }

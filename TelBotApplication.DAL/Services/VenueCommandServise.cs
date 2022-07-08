@@ -33,7 +33,7 @@ namespace TelBotApplication.DAL.Services
 
         public async Task<VenueCommand> GetByIdAsync(int id)
         {
-            VenueCommand entity = await _dbContext.VenueCommands.FindAsync(id).ConfigureAwait(false);
+            var entity = await _dbContext.VenueCommands.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 

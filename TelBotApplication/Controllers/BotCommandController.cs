@@ -29,7 +29,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<BotCaller>>> GetAllCommandsAsync()
         {
-            IEnumerable<BotCaller> list = await _commandService.BotCommandService.GetAllAsync();
+            var list = await _commandService.BotCommandService.GetAllAsync();
             return Ok(list);
         }
         /// <summary>
@@ -42,7 +42,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BotCaller>> AddnewCommandAsync(BotCallerRequest botCallerRequest)
         {
-            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
+            var command = _mapper.Map<BotCaller>(botCallerRequest);
             await _commandService.BotCommandService.AddAsync(command);
             return Ok();
         }
@@ -56,7 +56,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandAsync(BotCallerRequestForUpdate botCallerRequest)
         {
-            BotCaller command = _mapper.Map<BotCaller>(botCallerRequest);
+            var command = _mapper.Map<BotCaller>(botCallerRequest);
             await _commandService.BotCommandService.UpdateAsync(command);
             return Ok();
         }
@@ -70,7 +70,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateCommandsListAsync(IEnumerable<BotCallerRequestForUpdate> botCallerRequestsList)
         {
-            IEnumerable<BotCaller> commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
+            var commandsList = _mapper.Map<IEnumerable<BotCaller>>(botCallerRequestsList);
             await _commandService.BotCommandService.UpdateListAsync(commandsList);
             return Ok();
         }
@@ -84,7 +84,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> DeleteCommandByIdAsync(int id)
         {
-            BotCaller entity = await _commandService.BotCommandService.GetByIdAsync(id);
+            var entity = await _commandService.BotCommandService.GetByIdAsync(id);
             await _commandService.BotCommandService.DeleteAsync(entity);
             return Ok();
         }

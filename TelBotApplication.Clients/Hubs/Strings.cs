@@ -1,6 +1,4 @@
-﻿using TelBotApplication.Clients.Hubs;
-
-namespace TelBotApplication.Clients
+﻿namespace TelBotApplication.Clients.Hubs
 {
     public static class Strings
     {

@@ -4,21 +4,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TelBotApplication.Clients.BotServices;
 using TelBotApplication.Clients.helpers;
 using TelBotApplication.Clients.Hubs;
-using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Abstraction;
 using TelBotApplication.Domain.Chats;
 using TelBotApplication.Domain.Commands;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Enums;
-using TelBotApplication.Domain.Models;
-using TelBotApplication.Domain.NewFolder.Executors.Extensions;
+using TelBotApplication.Domain.Executors.Extensions;
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Extensions.Polling;
@@ -49,7 +46,7 @@ namespace TelBotApplication.Clients
         private ChatUser _incomingUser = default;
         private CancellationTokenSource cts;
         private CancellationTokenSource _ctsHello;
-        private List<UserRepeater> _counterKessages;
+        private readonly List<UserRepeater> _counterKessages;
         private readonly IMemberExecutor _newmembersService;
         private List<long> _adminsIds;
         public ScopedProcessingService(IServiceProvider serviceProvider,
@@ -98,7 +95,7 @@ namespace TelBotApplication.Clients
 
             await _bot.RestrictChatMemberAsync(message.Chat.Id, userId: _callBackUser.UserId,
                 new ChatPermissions { CanSendMessages = false, CanSendMediaMessages = false }, untilDate: DateTime.Now.AddMinutes(10));
-            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а)" +
+            var result = await _bot.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: Ты не нажал(а)" +
                 $" кнопку, значит ты БОТ или СПАМЕР, в тестовом режиме РО на пять минут \n Пока можно изучить правила чата \n" +
                 $@"https://t.me/winnersDV2022flood/3");
             await Task.Delay(5000);
@@ -107,7 +104,7 @@ namespace TelBotApplication.Clients
         }
         private async Task _newmembersService_AlertEvent(Message message, CancellationToken cancellationToken = default)
         {
-            Message result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
+            var result = await _bot.SendTextMessageAsync(chatId: message.Chat, $"@{_incomingUser.FirstName}   {_incomingUser.UserName}," +
                                              $" пожалуйста выполни проверку на антиспам https://t.me/{message.Chat.Username}/{_incomingUser.MessageId}", disableWebPagePreview: true);
             await Task.Delay(10000);
             await _bot.DeleteMessageAsync(result.Chat.Id, result.MessageId);
@@ -124,11 +121,11 @@ namespace TelBotApplication.Clients
         public async Task StartChatPolling(CancellationToken stoppingToken)
         {
             cts = new CancellationTokenSource();
-            CancellationToken cancellationToken = cts.Token;
-            Task pollingTask = RunBotPolling(cancellationToken);
-            Task dbUpdaterTask = AddCommandsListForBot(cancellationToken);
-            Task filters = _filter.UpdateFilters();
-            Task anchors = _anchorHandler.UpdateAchors();
+            var cancellationToken = cts.Token;
+            var pollingTask = RunBotPolling(cancellationToken);
+            var dbUpdaterTask = AddCommandsListForBot(cancellationToken);
+            var filters = _filter.UpdateFilters();
+            var anchors = _anchorHandler.UpdateAchors();
 
             await Task.WhenAll(pollingTask, dbUpdaterTask, filters, anchors);
 
@@ -137,12 +134,12 @@ namespace TelBotApplication.Clients
         #region Start
         private async Task RunBotPolling(CancellationToken cancellationToken)
         {
-            ReceiverOptions receiverOptions = new ReceiverOptions
+            var receiverOptions = new ReceiverOptions
             {
                 AllowedUpdates = Array.Empty<UpdateType>(),
                 ThrowPendingUpdates = true
             };
-            QueuedUpdateReceiver updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
+            var updateReceiver = new QueuedUpdateReceiver(_bot, receiverOptions);
 
             try
             {
@@ -151,7 +148,7 @@ namespace TelBotApplication.Clients
                     cts = new CancellationTokenSource();
 
                 }
-                await foreach (Update update in updateReceiver.WithCancellation(cts.Token))
+                await foreach (var update in updateReceiver.WithCancellation(cts.Token))
                 {
 
                     if (update is Update message)
@@ -177,8 +174,8 @@ namespace TelBotApplication.Clients
                 var list = await _commandCondition.GetAllBotCommands();
                 _botCommands = _mapper.Map<IEnumerable<BotCommandDto>>(list);
                 _venueRequests = _mapper.Map<IEnumerable<VenueRequest>>(locations);
-                List<BotCommand> commandsList = new List<BotCommand>();
-                foreach (BotCommandDto item in _botCommands)
+                var commandsList = new List<BotCommand>();
+                foreach (var item in _botCommands)
                 {
                     commandsList.Add(new BotCommand
                     {
@@ -186,7 +183,7 @@ namespace TelBotApplication.Clients
                         Description = item.Description
                     });
                 }
-                foreach (VenueRequest item in _venueRequests)
+                foreach (var item in _venueRequests)
                 {
                     commandsList.Add(new BotCommand
                     {
@@ -218,11 +215,11 @@ namespace TelBotApplication.Clients
                 _ctsHello = new CancellationTokenSource();
             }
 
-            ChatMessage chat_message = new ChatMessage(update);
-            ChatUser user = chat_message.GetCurrentUser();
-            Message message = chat_message.GetCurrentMessage();
-            long userId = user.UserId;
-            string text = chat_message.GetCurrentMessageText();
+            var chat_message = new ChatMessage(update);
+            var user = chat_message.GetCurrentUser();
+            var message = chat_message.GetCurrentMessage();
+            var userId = user.UserId;
+            var text = chat_message.GetCurrentMessageText();
 
 
             _logger.LogDebug(Newtonsoft.Json.JsonConvert.SerializeObject(update));
@@ -256,7 +253,7 @@ namespace TelBotApplication.Clients
                 if (text != null && _botCommands != null && (_botCommands.Any(x => text.Contains($"{x.Command.Trim()}@", StringComparison.OrdinalIgnoreCase)) || _botCommands.Any(x => text.Equals(x.Command.Trim(), StringComparison.OrdinalIgnoreCase))))
                 {
 
-                    BotCommandDto command = _botCommands.FirstOrDefault(x => text.Contains($"{x.Command.Trim()}@", StringComparison.OrdinalIgnoreCase) || text.Equals(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+                    var command = _botCommands.FirstOrDefault(x => text.Contains($"{x.Command.Trim()}@", StringComparison.OrdinalIgnoreCase) || text.Equals(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
                     switch (command.TypeOfreaction)
                     {
                         case TypeOfreactions.Text:
@@ -275,7 +272,7 @@ namespace TelBotApplication.Clients
 
                 if (text != null && _venueRequests != null && _venueRequests.Any(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase)))
                 {
-                    VenueRequest location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
+                    var location = _venueRequests.FirstOrDefault(x => text.Contains(x.Command.Trim(), StringComparison.OrdinalIgnoreCase));
                     await botClient.SendVenueWithDelayAsync(true, new TimeSpan(0, 0, 30), message, location, message.Chat, cancellationToken: cancellationToken);
 
                     return;
@@ -289,10 +286,10 @@ namespace TelBotApplication.Clients
                 #endregion Anchors
                 if (message?.Type != null && message.Type == MessageType.ChatMembersAdded)
                 {
-                    int index = _rnd.Next(_fruitsArr.Length);
+                    var index = _rnd.Next(_fruitsArr.Length);
                     _fruit = _fruitsArr[index];
                     _callBackUser = new CallBackUser { UserId = user.UserId };
-                    Message messageHello = await SendInAntiSpamline(botClient: botClient, message: message, user, _fruit, update, cancellationToken: cancellationToken);
+                    var messageHello = await SendInAntiSpamline(botClient: botClient, message: message, user, _fruit, update, cancellationToken: cancellationToken);
                     _newmembersService.AddNewMember(_callBackUser, messageHello, DateTime.Now);
                     return;
                 }
@@ -440,15 +437,15 @@ namespace TelBotApplication.Clients
 
                 else
                 {
-                    string trimmedText = text.Remove(text.Length - 1, 1);
-                    bool res = long.TryParse(trimmedText.Trim(), out long temp);
+                    var trimmedText = text.Remove(text.Length - 1, 1);
+                    var res = long.TryParse(trimmedText.Trim(), out var temp);
                     if (res && message.Type == MessageType.Text)
                     {
                         _ = await Task.Factory.StartNew(async () =>
                         {
                             if (res && text.EndsWith('f') || text.EndsWith('F') || text.EndsWith('ф') || text.EndsWith('Ф'))
                             {
-                                Message result = await botClient.SendTextMessageAsync(message.Chat, $" {text} = {(temp - 32) * 5 / 9}C° для {user.FullName} !", cancellationToken: cancellationToken);
+                                var result = await botClient.SendTextMessageAsync(message.Chat, $" {text} = {(temp - 32) * 5 / 9}C° для {user.FullName} !", cancellationToken: cancellationToken);
                                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                                 await Task.Delay(3000, cancellationToken);
                                 await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
@@ -457,7 +454,7 @@ namespace TelBotApplication.Clients
                             else if (res && text.EndsWith('c') || text.EndsWith('C') || text.EndsWith('с') || text.EndsWith('С'))
 
                             {
-                                Message result = await botClient.SendTextMessageAsync(message.Chat, $" {text} = {(temp * 9 / 5) + 32}F° для {user.FullName} !", cancellationToken: cancellationToken);
+                                var result = await botClient.SendTextMessageAsync(message.Chat, $" {text} = {(temp * 9 / 5) + 32}F° для {user.FullName} !", cancellationToken: cancellationToken);
                                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                                 await Task.Delay(3000, cancellationToken);
                                 await botClient.DeleteMessageAsync(chatId: result.Chat, result.MessageId, cancellationToken);
@@ -481,10 +478,10 @@ namespace TelBotApplication.Clients
 
             if (update.Type == UpdateType.CallbackQuery)
             {
-                long chatId = update.CallbackQuery.Message.Chat.Id;
-                int messId = update.CallbackQuery.Message.MessageId;
-                string codeOfButton = update.CallbackQuery.Data;
-                string telegramMessage = codeOfButton;
+                var chatId = update.CallbackQuery.Message.Chat.Id;
+                var messId = update.CallbackQuery.Message.MessageId;
+                var codeOfButton = update.CallbackQuery.Data;
+                var telegramMessage = codeOfButton;
                 if (_fruitsArr.Contains(codeOfButton, StringComparer.Ordinal) && _callBackUser != null && _callBackUser.UserId == update.CallbackQuery.From.Id)
                 {
                     _newmembersService.DropNewMember(update.CallbackQuery);
@@ -525,8 +522,8 @@ namespace TelBotApplication.Clients
         #region Inline buttons
         private async void SendInlineAdmins(ITelegramBotClient botClient, ChatMember[] members, Telegram.Bot.Types.Chat chat, Message message, long chatId, CancellationToken cancellationToken)
         {
-            IEnumerable<IEnumerable<InlineKeyboardButton>> btnArr = GetButtons(members);
-            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(btnArr);
+            var btnArr = GetButtons(members);
+            var inlineKeyboard = new InlineKeyboardMarkup(btnArr);
             // keyboard
             await botClient.DeleteMessageAsync(chatId: chat, message.MessageId, cancellationToken);
             _ = await botClient.SendTextMessageAsync(
@@ -539,7 +536,7 @@ namespace TelBotApplication.Clients
         }
         private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtons(ChatMember[] members)
         {
-            foreach (ChatMember member in members)
+            foreach (var member in members)
             {
                 yield return new InlineKeyboardButton[]
                 {
@@ -549,7 +546,7 @@ namespace TelBotApplication.Clients
         }
         private IEnumerable<IEnumerable<InlineKeyboardButton>> GetButtonsForHello()
         {
-            foreach (string fruit in _fruitsArr)
+            foreach (var fruit in _fruitsArr)
             {
                 yield return new InlineKeyboardButton[]
                 {
@@ -560,7 +557,7 @@ namespace TelBotApplication.Clients
         private async Task<Message> SendInAntiSpamline(ITelegramBotClient botClient, Message message, ChatUser user, string fruit, Update update, CancellationToken cancellationToken)
         {
 
-            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
+            var keyboard = new InlineKeyboardMarkup(
                new[]
                {
                     new[]
@@ -574,7 +571,7 @@ namespace TelBotApplication.Clients
                     }
                });
             _incomingUser = new ChatUser(update: update);
-            Message messag = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: {user.FullName}  @{user.UserName}, если ты " +
+            var messag = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, $"ВАЖНО: {user.FullName}  @{user.UserName}, если ты " +
                 $"не БОТ и не СПАМЕР, пройди проверку, нажав на кнопку, где есть {fruit}", parseMode: ParseMode.Html, replyMarkup: keyboard,
                cancellationToken: cancellationToken);
 

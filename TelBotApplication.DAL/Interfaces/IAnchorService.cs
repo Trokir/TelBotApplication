@@ -4,7 +4,7 @@ using TelBotApplication.Domain.Models.Anchors;
 
 namespace TelBotApplication.DAL.Interfaces
 {
-    public  interface IAnchorService : IGenericRepository<Anchor>
+    public interface IAnchorService : IGenericRepository<Anchor>
     {
     }
 }

@@ -71,7 +71,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult> UpdateAdminsListAsync(IEnumerable<AnchorForUpdate> botCallerRequestsList)
         {
-            IEnumerable<Anchor> commandsList = _mapper.Map<IEnumerable<Anchor>>(botCallerRequestsList);
+            var commandsList = _mapper.Map<IEnumerable<Anchor>>(botCallerRequestsList);
             await _commandService.AnchorService.UpdateListAsync(commandsList);
             return Ok();
         }
@@ -98,10 +98,10 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<Anchor>>> DeleteAllAnchorsAsync()
         {
-            await _commandService.AnchorService.DeleteRangeAsync(x=>!string.IsNullOrEmpty(x.Tag));
+            await _commandService.AnchorService.DeleteRangeAsync(x => !string.IsNullOrEmpty(x.Tag));
             return Ok();
         }
 
-        
+
     }
 }

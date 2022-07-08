@@ -10,12 +10,12 @@ namespace TelBotApplication.DAL
 
         public TelBotApplicationDbContext CreateDbContext(string[] args)
         {
-            IConfigurationRoot configuration = new ConfigurationBuilder()
+            var configuration = new ConfigurationBuilder()
                 .SetBasePath(Path.Combine(@"E:\Projects\TelBotApplication\TelBotApplication"))
                 .AddJsonFile("appsettings.Development.json")
                 .Build();
-            DbContextOptionsBuilder<TelBotApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
-            string connection = @"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db";
+            var optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
+            var connection = @"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db";
             _ = optionsBuilder.UseSqlite(connection);
             return new TelBotApplicationDbContext(optionsBuilder.Options);
         }

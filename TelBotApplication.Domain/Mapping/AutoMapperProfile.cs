@@ -30,7 +30,7 @@ namespace TelBotApplication.Domain.Mapping
               .ForMember(x => x.ButtonText, opt => opt.MapFrom(z => z.AnchorCallback.ButtonText));
             _ = CreateMap<AnchorForUpdate, Anchor>()
                 .ForMember(x => x.AnchorCallback, opt => opt.MapFrom(z => new AnchorCallback { ButtonCondition = z.ButtonCondition, ButtonText = z.ButtonText }));
-            
+
         }
     }
 }

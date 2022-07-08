@@ -19,9 +19,9 @@ namespace TelBotApplication.Clients
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            using (IServiceScope scope = Services.CreateScope())
+            using (var scope = Services.CreateScope())
             {
-                IScopedProcessingService scopedProcessingService =
+                var scopedProcessingService =
                     scope.ServiceProvider
                         .GetRequiredService<IScopedProcessingService>();
 

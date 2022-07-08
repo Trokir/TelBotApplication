@@ -22,7 +22,7 @@ namespace TelBotApplication.Domain.Chats
         }
 
 
-        public void AddNewMember(CallBackUser user,Message message, DateTime addDate)
+        public void AddNewMember(CallBackUser user, Message message, DateTime addDate)
         {
             var member = new Member { Id = user.UserId, Message = message, AddDate = addDate };
             if (_members.TryAdd(member.Id, member)) return;

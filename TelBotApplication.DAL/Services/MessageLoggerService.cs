@@ -33,7 +33,7 @@ namespace TelBotApplication.DAL.Services
 
         public async Task<MessageLogger> GetByIdAsync(int id)
         {
-            MessageLogger entity = await _dbContext.MessageLoggers.FindAsync(id).ConfigureAwait(false);
+            var entity = await _dbContext.MessageLoggers.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 

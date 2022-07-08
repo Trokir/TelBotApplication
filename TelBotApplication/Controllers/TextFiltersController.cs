@@ -43,7 +43,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<TextFilter>>> GetAllFiltersAsync(TypeOfFilter ofFilter)
         {
-            var list = await _commandService.TextFilterService.GetAllAsync(x=>x.Filter == ofFilter);
+            var list = await _commandService.TextFilterService.GetAllAsync(x => x.Filter == ofFilter);
             return Ok(list);
         }
 
@@ -73,7 +73,7 @@ namespace TelBotApplication.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<TextFilter>> GetFilterByWordAsync(string word)
         {
-            var list = await _commandService.TextFilterService.FindAsync(x => x.Text.Equals(word,System.StringComparison.InvariantCultureIgnoreCase));
+            var list = await _commandService.TextFilterService.FindAsync(x => x.Text.Equals(word, System.StringComparison.InvariantCultureIgnoreCase));
             return Ok(list);
         }
 

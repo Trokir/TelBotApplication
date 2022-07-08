@@ -4,13 +4,11 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Dtos;
-using TelBotApplication.Domain.Models.Anchors;
-using TelBotApplication.Domain.NewFolder.Executors.Extensions;
+using TelBotApplication.Domain.Executors.Extensions;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -34,7 +32,7 @@ namespace TelBotApplication.Clients.BotServices
         public async Task UpdateAchors()
         {
             _logger.LogDebug("Start UpdateAchors");
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             while (true)
             {
 
@@ -59,7 +57,7 @@ namespace TelBotApplication.Clients.BotServices
                     switch (anchor.AnchorCallBackType)
                     {
                         case Domain.Enums.AnchorCallBack.Link:
-                            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
+                            var keyboard = new InlineKeyboardMarkup(
                             new[] { new[] { InlineKeyboardButton.WithUrl(anchor.ButtonText, anchor.ButtonCondition) } });
                             await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, anchor.Message,
                                 new TimeSpan(0, anchor.UntilMinutes, 0), ParseMode.Html, replyMarkup: keyboard, cancellationToken: cancellationToken);
@@ -73,7 +71,7 @@ namespace TelBotApplication.Clients.BotServices
                          InlineKeyboardButton.WithCallbackData(text: "👎", callbackData: "👎"),
                         }
                        });
-                          
+
                             await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, anchor.Message,
                                                            new TimeSpan(0, anchor.UntilMinutes, 0), ParseMode.Html, replyMarkup: keyboard, cancellationToken: cancellationToken);
 

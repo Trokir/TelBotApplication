@@ -9,7 +9,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InputFiles;
 using Telegram.Bot.Types.ReplyMarkups;
 
-namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
+namespace TelBotApplication.Domain.Executors.Extensions
 {
     // string texto = @"<b>bold</b>, <strong> bold </strong>" +
     //@"<i> italic </i>, <em> italic </em>" +
@@ -39,8 +39,8 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             }
             await Task.Factory.StartNew(async () =>
             {
-                Chat c = message.Chat;
-                Message result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
+                var c = message.Chat;
+                var result = await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: text, parseMode: parseMode, entities: entities, disableWebPagePreview: disableWebPagePreview,
                    disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);
                 await Task.Delay(delay, cancellationToken);
@@ -73,7 +73,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             }
             await Task.Factory.StartNew(async () =>
             {
-                Message result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
+                var result = await botClient.SendAnimationAsync(chatId: message.Chat.Id,
                                   animation: animation, duration: duration, width: width, height: height,
                                   thumb: thumb, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
                                   replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
@@ -136,7 +136,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             }
             await Task.Factory.StartNew(async () =>
             {
-                Message result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude,
+                var result = await botClient.SendVenueAsync(chatId: message.Chat, latitude: location.Latitude, longitude: location.Longitude,
                               title: location.Title, address: location.Address,
                               foursquareId: foursquareId, foursquareType: foursquareType, googlePlaceId: googlePlaceId, googlePlaceType: googlePlaceType,
                               disableNotification: disableNotification, replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
@@ -169,7 +169,7 @@ namespace TelBotApplication.Domain.NewFolder.Executors.Extensions
             }
             await Task.Factory.StartNew(async () =>
             {
-                Message result = await botClient.SendPhotoAsync(chatId: chatId,
+                var result = await botClient.SendPhotoAsync(chatId: chatId,
                                   photo: photo, caption: caption, parseMode: parseMode, captionEntities: captionEntities, disableNotification: disableNotification,
                                    replyToMessageId: replyToMessageId, allowSendingWithoutReply: allowSendingWithoutReply, replyMarkup: replyMarkup, cancellationToken: cancellationToken);
                 await botClient.DeleteMessageAsync(chatId: message.Chat, message.MessageId, cancellationToken);

@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.SignalR.Client;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TelBotApplication.Clients;
 using TelBotApplication.Clients.Hubs;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Enums;
@@ -69,7 +67,7 @@ namespace MemberMessageClient
             {
                 if (array.Any() && array[4] != null && array[4].Length > 10)
                 {
-                    
+
                     await _dbContext.MessageLoggerService.AddAsync(new MessageLogger
                     {
                         FullName = array[2],

@@ -7,7 +7,7 @@ using TelBotApplication.DAL;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.DAL.Services;
 
-Console.Title ="Client";
+Console.Title = "Client";
 
 var host = Host.CreateDefaultBuilder(args)
     .ConfigureLogging(logging =>

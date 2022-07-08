@@ -27,7 +27,7 @@ namespace TelBotApplication.Clients.BotServices
         }
         public async Task UpdateFilters()
         {
-            using IServiceScope scope = _factory.CreateScope();
+            using var scope = _factory.CreateScope();
             while (true)
             {
 
@@ -78,7 +78,7 @@ namespace TelBotApplication.Clients.BotServices
                     }
                 }
             }
-          
+
             return string.Empty;
         }
 

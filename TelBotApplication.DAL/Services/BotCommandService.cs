@@ -34,7 +34,7 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task<BotCaller> GetByIdAsync(int id)
         {
-                BotCaller entity = await _dbContext.BotCallers.FindAsync(id).ConfigureAwait(false);
+            var entity = await _dbContext.BotCallers.FindAsync(id).ConfigureAwait(false);
             return entity;
         }
 
@@ -45,13 +45,13 @@ namespace TelBotApplication.DAL.Services
         public async Task UpdateAsync(BotCaller entity)
         {
             _ = _dbContext.BotCallers.Update(entity);
-                    _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task UpdateListAsync(IEnumerable<BotCaller> entities)
         {
             _dbContext.BotCallers.UpdateRange(entities);
-                    _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+            _ = await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<BotCaller>> GetAllAsync(Expression<Func<BotCaller, bool>> predicate)
@@ -60,11 +60,11 @@ namespace TelBotApplication.DAL.Services
         }
         public async Task<BotCaller> FindAsync(Expression<Func<BotCaller, bool>> predicate)
         {
-            return await _dbContext.BotCallers.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false); 
+            return await _dbContext.BotCallers.Where(predicate).FirstOrDefaultAsync().ConfigureAwait(false);
         }
         public async Task DeleteRangeAsync(Expression<Func<BotCaller, bool>> predicate)
         {
-        var list = await _dbContext.BotCallers.Where(predicate).ToListAsync().ConfigureAwait(false);
+            var list = await _dbContext.BotCallers.Where(predicate).ToListAsync().ConfigureAwait(false);
             _dbContext.BotCallers.RemoveRange(list);
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }

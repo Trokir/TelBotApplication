@@ -1,15 +1,15 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System;
 using System.IO;
 using System.Reflection;
 using TelBotApplication.Clients.Hubs;
-using TelBotApplication.Domain.Mapping;
-using Microsoft.Extensions.Configuration;
 using TelBotApplication.Compostions;
-using System;
+using TelBotApplication.Domain.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
@@ -32,7 +32,7 @@ app.Run();
 
 void ConfigureServices(IServiceCollection services)
 {
-    
+
     _ = services.AddLogging(config =>
     {
         _ = config.AddDebug();
@@ -56,7 +56,7 @@ void ConfigureServices(IServiceCollection services)
     });
     _ = services.AddHttpClient();
     _ = services.AddResponseCaching();
-    
+
 }
 void ConfigureApp(WebApplication app)
 {

@@ -14,5 +14,5 @@ namespace TelBotApplication.Clients.Hubs
             await Clients.All.EditLog(message);
         }
     }
-   
+
 }
