@@ -27,10 +27,10 @@ namespace TelBotApplication.Controllers
         [HttpGet("getall")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Anchor>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<IEnumerable<AnchorDTO>>> GetAllAnchorsAsync()
+        public async Task<ActionResult<IEnumerable<AnchorForUpdate>>> GetAllAnchorsAsync()
         {
             var list = await _commandService.AnchorService.GetAllAsync();
-            var result = _mapper.Map<IEnumerable<AnchorDTO>>(list);
+            var result = _mapper.Map<IEnumerable<AnchorForUpdate>>(list);
             return Ok(result);
         }
         /// <summary>
@@ -55,7 +55,7 @@ namespace TelBotApplication.Controllers
         [HttpPut("update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateAnchorAsync(AnchorDTO botCallerRequest)
+        public async Task<ActionResult> UpdateAnchorAsync(AnchorForUpdate botCallerRequest)
         {
             var command = _mapper.Map<Anchor>(botCallerRequest);
             await _commandService.AnchorService.UpdateAsync(command);
@@ -69,7 +69,7 @@ namespace TelBotApplication.Controllers
         [HttpPut("updatelist")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<ActionResult> UpdateAdminsListAsync(IEnumerable<AnchorDTO> botCallerRequestsList)
+        public async Task<ActionResult> UpdateAdminsListAsync(IEnumerable<AnchorForUpdate> botCallerRequestsList)
         {
             IEnumerable<Anchor> commandsList = _mapper.Map<IEnumerable<Anchor>>(botCallerRequestsList);
             await _commandService.AnchorService.UpdateListAsync(commandsList);
@@ -93,7 +93,7 @@ namespace TelBotApplication.Controllers
         /// Удаление всех якорей
         /// </summary>
         /// <returns></returns>
-        [HttpGet("deletebydate")]
+        [HttpGet("deleteall")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Anchor>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<Anchor>>> DeleteAllAnchorsAsync()
@@ -101,5 +101,7 @@ namespace TelBotApplication.Controllers
             await _commandService.AnchorService.DeleteRangeAsync(x=>!string.IsNullOrEmpty(x.Tag));
             return Ok();
         }
+
+        
     }
 }

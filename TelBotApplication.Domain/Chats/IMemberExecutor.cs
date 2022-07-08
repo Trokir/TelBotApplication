@@ -12,7 +12,6 @@ namespace TelBotApplication.Domain.Chats
 
         void AddNewMember(CallBackUser user, Message message, DateTime addDate);
         void DropNewMember(CallbackQuery callbackQuery);
-        void ClearMembersList();
         void RunAlertPolling();
     }
 }

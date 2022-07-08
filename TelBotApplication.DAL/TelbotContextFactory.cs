@@ -15,7 +15,7 @@ namespace TelBotApplication.DAL
                 .AddJsonFile("appsettings.Development.json")
                 .Build();
             DbContextOptionsBuilder<TelBotApplicationDbContext> optionsBuilder = new DbContextOptionsBuilder<TelBotApplicationDbContext>();
-            string connection = @"Data source=E:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db";
+            string connection = @"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db";
             _ = optionsBuilder.UseSqlite(connection);
             return new TelBotApplicationDbContext(optionsBuilder.Options);
         }

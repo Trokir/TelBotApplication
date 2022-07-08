@@ -21,9 +21,16 @@ namespace TelBotApplication.Domain.Mapping
             _ = CreateMap<Anchor, AnchorDTO>()
                 .ForMember(x => x.ButtonCondition, opt => opt.MapFrom(z => z.AnchorCallback.ButtonCondition))
                 .ForMember(x => x.ButtonText, opt => opt.MapFrom(z => z.AnchorCallback.ButtonText));
-
+            _ = CreateMap<AnchorDTO, Anchor>()
+                .ForMember(x => x.AnchorCallback, opt => opt.MapFrom(z => new AnchorCallback { ButtonCondition = z.ButtonCondition, ButtonText = z.ButtonText }));
             _ = CreateMap<AnchorCallbackDTO, AnchorCallback>();
             _ = CreateMap<AnchorCallback, AnchorCallbackDTO>();
+            _ = CreateMap<Anchor, AnchorForUpdate>()
+              .ForMember(x => x.ButtonCondition, opt => opt.MapFrom(z => z.AnchorCallback.ButtonCondition))
+              .ForMember(x => x.ButtonText, opt => opt.MapFrom(z => z.AnchorCallback.ButtonText));
+            _ = CreateMap<AnchorForUpdate, Anchor>()
+                .ForMember(x => x.AnchorCallback, opt => opt.MapFrom(z => new AnchorCallback { ButtonCondition = z.ButtonCondition, ButtonText = z.ButtonText }));
+            
         }
     }
 }

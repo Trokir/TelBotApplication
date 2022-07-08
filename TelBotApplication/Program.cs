@@ -14,6 +14,7 @@ using System;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR();
 builder.Services.AddDependencies(builder.Configuration);
+builder.Services.AddMemoryCache();
 ConfigureServices(builder.Services);
 var app = builder.Build();
 ConfigureApp(app);
@@ -53,7 +54,9 @@ void ConfigureServices(IServiceCollection services)
         var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
     });
-   
+    _ = services.AddHttpClient();
+    _ = services.AddResponseCaching();
+    
 }
 void ConfigureApp(WebApplication app)
 {

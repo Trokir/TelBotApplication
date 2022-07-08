@@ -5,10 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using TelBotApplication.DAL.Interfaces;
 using TelBotApplication.Domain.Dtos;
 using TelBotApplication.Domain.Models.Anchors;
+using TelBotApplication.Domain.NewFolder.Executors.Extensions;
+using Telegram.Bot;
+using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelBotApplication.Clients.BotServices
 {
@@ -43,13 +49,44 @@ namespace TelBotApplication.Clients.BotServices
             }
         }
 
-        public async Task ExecuteAncor(string text)
+        public async Task ExecuteAncor(ITelegramBotClient botClient, Message message, string text, CancellationToken cancellationToken)
         {
             if (_anchors is HashSet<AnchorDTO> keys)
             {
-                if (keys.Any(x=>x.Tag.Equals(text.Trim(),StringComparison.InvariantCultureIgnoreCase)))
+                if (keys.Any(x => x.Tag.Equals(text.Trim(), StringComparison.InvariantCultureIgnoreCase)))
                 {
                     var anchor = keys.SingleOrDefault(x => x.Tag.Equals(text.Trim(), StringComparison.InvariantCultureIgnoreCase));
+                    switch (anchor.AnchorCallBackType)
+                    {
+                        case Domain.Enums.AnchorCallBack.Link:
+                            InlineKeyboardMarkup keyboard = new InlineKeyboardMarkup(
+                            new[] { new[] { InlineKeyboardButton.WithUrl(anchor.ButtonText, anchor.ButtonCondition) } });
+                            await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, anchor.Message,
+                                new TimeSpan(0, anchor.UntilMinutes, 0), ParseMode.Html, replyMarkup: keyboard, cancellationToken: cancellationToken);
+                            break;
+
+
+                        case Domain.Enums.AnchorCallBack.Reaction:
+                            keyboard = new InlineKeyboardMarkup(
+            new[]{new[]{
+                         InlineKeyboardButton.WithCallbackData(text: "👍", callbackData: "👍"),
+                         InlineKeyboardButton.WithCallbackData(text: "👎", callbackData: "👎"),
+                        }
+                       });
+                          
+                            await botClient.SendTextMessageWhithDelayAsync(isEnabled: true, message, message.Chat, anchor.Message,
+                                                           new TimeSpan(0, anchor.UntilMinutes, 0), ParseMode.Html, replyMarkup: keyboard, cancellationToken: cancellationToken);
+
+                            break;
+                        case Domain.Enums.AnchorCallBack.Share:
+                            break;
+                        case Domain.Enums.AnchorCallBack.CallTrigger:
+                            break;
+                        case Domain.Enums.AnchorCallBack.None:
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
         }

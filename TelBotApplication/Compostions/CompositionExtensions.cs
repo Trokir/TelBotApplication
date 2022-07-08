@@ -13,7 +13,7 @@ namespace TelBotApplication.Compostions
             EnvironmentBotConfiguration botConfig = new EnvironmentBotConfiguration();
             configuration.GetSection("BotConfig").Bind(botConfig);
             _ = services.AddSingleton(Options.Create(botConfig));
-            return services.AddDalDependensies(@"Data source=E:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db").AddIntegrationDependencies(configuration);
+            return services.AddDalDependensies(@"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db").AddIntegrationDependencies(configuration);
                 
         }
     }

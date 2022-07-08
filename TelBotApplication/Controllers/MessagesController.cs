@@ -56,7 +56,7 @@ namespace TelBotApplication.Controllers
             return Ok(list);
         }
 
-        [HttpGet("deletebydate")]
+        [HttpDelete("deletebydate")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<MessageLogger>))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<MessageLogger>>> DeleteAllMessagesAsync(DateTime dateTime)

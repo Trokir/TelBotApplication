@@ -52,14 +52,14 @@ namespace TelBotApplication.Domain.Chats
                 foreach (var member in _members)
                 {
                     var diffInSeconds = (DateTime.Now - member.Value.AddDate).TotalSeconds;
-                    if (diffInSeconds >= 15 && diffInSeconds < 17 && !member.Value.IsAlerted && !member.Value.IsRestricted)
+                    if (diffInSeconds >= 30 && diffInSeconds < 32 && !member.Value.IsAlerted && !member.Value.IsRestricted)
                     {
 
                         AlertEvent?.Invoke(member.Value.Message);
                         member.Value.IsAlerted = true;
 
                     }
-                    else if (diffInSeconds >= 30 && diffInSeconds < 32 && member.Value.IsAlerted && !member.Value.IsRestricted)
+                    else if (diffInSeconds >= 60 && diffInSeconds < 62 && member.Value.IsAlerted && !member.Value.IsRestricted)
                     {
                         RestrictEvent?.Invoke(member.Value.Message);
                         member.Value.IsRestricted = true;

@@ -25,7 +25,7 @@ var host = Host.CreateDefaultBuilder(args)
                 .AddTransient<IUnitOfWork, UnitOfWork>()
         .AddScoped<TelBotApplicationDbContext>();
         services.AddDbContext<TelBotApplicationDbContext>(opt =>
-        opt.UseSqlite(@"Data source=E:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db"));
+        opt.UseSqlite(@"Data source=D:/Projects/TelBotApplication/TelBotApplication.DAL/telbot.db"));
         SQLitePCL.Batteries.Init();
     })
     .Build();

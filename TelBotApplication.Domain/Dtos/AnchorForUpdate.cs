@@ -3,8 +3,9 @@ using TelBotApplication.Domain.Enums;
 
 namespace TelBotApplication.Domain.Dtos
 {
-    public class AnchorDTO
+    public class AnchorForUpdate
     {
+        public int Id { get; set; }
         [Required]
         [MinLength(5, ErrorMessage = "Message must be longer then 30 characters")]
         public string Tag { get; set; }
